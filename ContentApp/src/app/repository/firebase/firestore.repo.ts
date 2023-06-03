@@ -2,9 +2,11 @@ import { Firestore, collectionData, collection, doc, setDoc, getDoc, getDocs, up
 import { concatMap, filter, map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { FireAuthRepository } from './fireauth.repo';
-import { USERS_COL } from './firebase.constants';
 import { Injectable } from '@angular/core';
 import { Observable, from, of } from 'rxjs';
+
+export const USERS_COL = 'users';
+export const PURCHASED_USERS_COL = 'purchased_users';
 
 @Injectable({
   providedIn: 'root',
@@ -151,7 +153,7 @@ export class FirestoreRepository {
    * @param userId 
    * @returns 
    */
-  private async updateUsersDocument<T>(
+  async updateUsersDocument<T>(
     collectionPath: string,
     documentKey: string,
     data: Partial<T>,

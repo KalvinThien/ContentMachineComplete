@@ -1,31 +1,32 @@
 import { Injectable } from '@angular/core';
-import {
-  getAuth,
-  sendSignInLinkToEmail,
-  isSignInWithEmailLink,
-} from 'firebase/auth';
 import { Observable, Subject, from, map, of } from 'rxjs';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/compat/firestore';
+import { Auth, user } from '@angular/fire/auth';
+import { PURCHASED_USERS_COL, USERS_COL } from './firestore.repo';
+import { FirestoreRepository } from './firestore.repo';
 import { FirebaseUser } from '../../model/user/user.model';
-import { PURCHASED_USERS_COL, USERS_COL } from './firebase.constants';
-import { NavigationService } from '../../service/navigation.service';
+import { DocumentReference } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FireAuthRepository {
 
- sessionUser?: FirebaseUser;
+  sessionUser?: FirebaseUser;
+  user$;
+
   private userSubject: Subject<FirebaseUser> = new Subject<FirebaseUser>();
 
   constructor(
-    private angularFireAuth: AngularFireAuth,
-    private angularFirestore: AngularFirestore
+    private fireAuth: Auth,
+    private firestoreRepo: FirestoreRepository
   ) {
-    this.angularFireAuth.authState.subscribe((user: any) => {
+    this.user$ = user(this.fireAuth);
+    this.user$.subscribe((user: any) => {
       if (user) {
-        console.log("🚀 ~ file: fireauth.repo.ts:28 ~ FireAuthRepository ~ this.angularFireAuth.authState.subscribe ~ user:", user)
+        console.log(
+          '🚀 ~ file: fireauth.repo.ts:28 ~ FireAuthRepository ~ this.angularFireAuth.authState.subscribe ~ user:',
+          user
+        );
         this.sessionUser = user;
         this.setUserData(user);
         this.userSubject.next(user);
@@ -48,58 +49,51 @@ export class FireAuthRepository {
   }
 
   verifyPurchaseEmail(email: string): Observable<boolean> {
-    return from(this.angularFirestore.collection(PURCHASED_USERS_COL).doc(email).get().toPromise()).pipe(
+    return this.firestoreRepo.getUsersDocument(PURCHASED_USERS_COL, email).pipe(
       map((doc) => {
-        if (doc !== undefined && doc.exists) {
-          console.debug("🚀 ~ file: fireauth.repo.ts:53 ~ FireAuthRepository ~ verifyPurchaseEmail ~ doc.data():", doc.data())
+        if (doc !== undefined) {
           return true;
         } else {
-          console.debug("No such document!");
+          console.debug('No such document!');
           return false;
         }
       })
     );
   }
 
-  /* Setting up user data when sign in with username/password, 
-   * sign up with username/password and sign in with social auth  
-   * provider in Firestore database using AngularFirestore + AngularFirestoreDocument service 
+  /* Setting up user data when sign in with username/password,
+   * sign up with username/password and sign in with social auth
+   * provider in Firestore database using AngularFirestore + AngularFirestoreDocument service
    */
   async setUserData(user: any) {
-    const existingUserRef = this.angularFirestore.doc(`${USERS_COL}/${user.uid}`);
+    // const existingUserRef = this.angularFirestore.doc(
+    //   `${USERS_COL}/${user.uid}`
+    // );
     const userData = {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
-      isVirgin: user.isVirgin
+      isVirgin: user.isVirgin,
     };
-  
+
     // Check if the user document exists
-    const snapshot = await existingUserRef.get().toPromise();
-    if (snapshot?.exists) {
-      // User exists, update the existing user data
-      userData.isVirgin = false;
-      return existingUserRef.set(this.removeUndefinedProperties(userData), { merge: true });
-    } else {
-      // User doesn't exist, create a new user document
-      return existingUserRef.set(this.removeUndefinedProperties(userData));
-    }
+    this.firestoreRepo.getUsersDocument<DocumentReference>(USERS_COL, user.uid).subscribe((doc) => {
+      if (doc !== undefined) {
+        // User exists, update the existing user data
+        userData.isVirgin = false;
+        this.firestoreRepo.updateUsersDocument(USERS_COL, user.uid, userData);
+      } else {
+        // User doesn't exist, create a new user document
+        this.firestoreRepo.createUsersDocument(USERS_COL, userData, user.uid);
+      }
+    });
   }
-  
+
   // Sign out
   signOut(): Promise<void> {
     this.sessionUser = undefined;
-    return this.angularFireAuth.signOut();
-  }
-
-  private removeUndefinedProperties(obj: any): any {
-    return JSON.parse(JSON.stringify(obj, (key, value) => {
-      if (typeof value === 'undefined') {
-        return undefined; // Remove the property
-      }
-      return value;
-    }));
+    return this.fireAuth.signOut();
   }
 }
