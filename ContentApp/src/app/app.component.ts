@@ -6,6 +6,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  status = false;
+  addToggle()
+  {
+    this.status = !this.status;       
+  }
   title = 'Content Machine';
   constructor() { /** */ }
 }

@@ -15,9 +15,10 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { environment } from 'environments/environment';
 import { ConfirmationDialogComponent } from './views/common/confirmationdialog.component';
-import { DashboardComponent } from './views/dashboard/dashboard.component';
+import { CalendarComponent } from './views/calendar/calendar.component';
 import { PageNotFoundComponent } from './views/page-not-found/page-not-found.component';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
+import { HomeComponent } from './views/home/home.component';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -61,8 +62,9 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     AppComponent,
     LoginComponent,
     ConfirmationDialogComponent,
-    DashboardComponent,
-    PageNotFoundComponent
+    CalendarComponent,
+    PageNotFoundComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
