@@ -10,37 +10,41 @@ import { LoginComponent } from './views/login/login.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule} from '@angular/material/form-field';
 import { MatDialogModule } from '@angular/material/dialog';
-import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
-import { provideFirebaseApp, getApp, initializeApp } from '@angular/fire/app';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { environment } from 'environments/environment';
 import { ConfirmationDialogComponent } from './views/common/confirmationdialog.component';
+import { DashboardComponent } from './views/dashboard/dashboard.component';
+import { PageNotFoundComponent } from './views/page-not-found/page-not-found.component';
+import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
+
+firebase.initializeApp(environment.firebaseConfig);
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   signInFlow: 'popup',
   signInOptions: [
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-    {
-      scopes: [
-        'instagram_basic',
-        'instagram_manage_comments',
-        'instagram_manage_insights',
-        'instagram_content_publish',
-        'publish_video',
-        'page_events',
-        'pages_read_engagement',
-        'pages_manage_metadata',
-        'pages_read_user_content',
-        'pages_manage_ads',
-        'pages_manage_posts',
-        'pages_manage_engagement',
-      ],
-      customParameters: {
-        'auth_type': 'reauthenticate'
-      },
-      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID
-    },
+    // {
+    //   scopes: [
+    //     'instagram_basic',
+    //     'instagram_manage_comments',
+    //     'instagram_manage_insights',
+    //     'instagram_content_publish',
+    //     'publish_video',
+    //     'page_events',
+    //     'pages_read_engagement',
+    //     'pages_manage_metadata',
+    //     'pages_read_user_content',
+    //     'pages_manage_ads',
+    //     'pages_manage_posts',
+    //     'pages_manage_engagement',
+    //   ],
+    //   customParameters: {
+    //     'auth_type': 'reauthenticate'
+    //   },
+    //   provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID
+    // },
     firebase.auth.TwitterAuthProvider.PROVIDER_ID,
     {
       requireDisplayName: false,
@@ -56,7 +60,9 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
   declarations: [
     AppComponent,
     LoginComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    DashboardComponent,
+    PageNotFoundComponent
   ],
   imports: [
     BrowserModule,
@@ -68,12 +74,12 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     ReactiveFormsModule,
     MatFormFieldModule,
     MatDialogModule,
+    provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    provideAuth(() => getAuth()),
-    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
+    FirebaseUIModule.forRoot(firebaseUiAuthConfig)
   ],
-  providers: [],
+  providers: [ /** */ ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

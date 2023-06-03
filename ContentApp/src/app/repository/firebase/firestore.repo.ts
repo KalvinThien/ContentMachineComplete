@@ -23,24 +23,23 @@ export class FirestoreRepository {
     data: T,
     userId: string = this.fireAuth.sessionUser?.uid || ''
   ): Promise<T> {
-    const usersRef =  collection(this.firestore, USERS_COL);
-    const userRef = doc(usersRef, userId);
-    const userDocsCollectionRef = collection(userRef, collectionPath);
-    const userDocsRef = doc(userDocsCollectionRef);
+    const usersRef =  collection(this.firestore, collectionPath);
+    const userDocRef = doc(usersRef, userId);
+    // const userDocsCollectionRef = collection(userRef, );
+    // const userDocsRef = doc(userDocsCollectionRef);
 
     // The initial creation of our object and the update of the ID
-    setDoc(userDocsRef, this.sanitizeObject(data));
-    data = this.update(data, 'id', userDocsRef.id);
+    setDoc(userDocRef, this.sanitizeObject(data));
+    data = this.update(data, 'id', userDocRef.id);
     await this.updateUsersDocument<T>(
       collectionPath,
-      userDocsRef.id,
-      data,
-      userId
+      userDocRef.id,
+      data
     );
     
     if (!environment.production) {
       console.groupCollapsed(
-        `❤️‍🔥 Firestore Service [${userDocsRef.path}] [createUserDocument]`
+        `❤️‍🔥 Firestore Service [${userDocRef.path}] [createUserDocument]`
       );
       console.log(`❤️‍🔥 [${userId}]`, data);
       console.groupEnd();
@@ -82,9 +81,10 @@ export class FirestoreRepository {
   private getFocusedUsersDoc<T>(
     collectionPath: string,
     documentKey: string,
-    userId: string = this.fireAuth.sessionUser?.uid || ''
+    userId: string
   ): Observable<T> {
-    const userCollectionRef = collection(this.firestore, USERS_COL, userId, collectionPath);
+    // const userCollectionRef = collection(this.firestore, USERS_COL, userId, collectionPath);
+    const userCollectionRef = collection(this.firestore, collectionPath);
     const userDocRef = doc(userCollectionRef, documentKey);
     
     return from(getDoc(userDocRef)).pipe(  
@@ -98,7 +98,7 @@ export class FirestoreRepository {
         }
       }),
       filter((data) => !!data),
-      map((data) => data as T)
+      map((data) => data.data() as T)
     );
   }
 
@@ -156,10 +156,9 @@ export class FirestoreRepository {
   async updateUsersDocument<T>(
     collectionPath: string,
     documentKey: string,
-    data: Partial<T>,
-    userId: string = this.fireAuth.sessionUser?.uid || ''
+    data: Partial<T>
   ): Promise<boolean> {
-    const collectionRef = collection(this.firestore, USERS_COL, userId, collectionPath);
+    const collectionRef = collection(this.firestore, collectionPath);
     const userDocRef = doc(collectionRef, documentKey);
     
     return new Promise<boolean>((resolve, reject) => {
@@ -169,7 +168,7 @@ export class FirestoreRepository {
             console.groupCollapsed(
               `❤️‍🔥 Firestore Service [${userDocRef.path}] [updateUserDocument]`
             );
-            console.log(`❤️‍🔥 [${userId}]`, data);
+            console.log(`❤️‍🔥 [${documentKey}]`, data);
             console.groupEnd();
           }
           resolve(true); // Resolving the Promise with a boolean value indicating success

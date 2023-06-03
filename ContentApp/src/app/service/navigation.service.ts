@@ -5,10 +5,14 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class NavigationService {
+
   constructor(private router: Router) {
     /** */
   }
-
+  
+  navigateToDashboard() {
+    this.router.navigate(['dashboard']);
+  }
   
   // navigateToCopyCat() {
   //   this.router.navigate(['maker/copycat']);
