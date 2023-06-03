@@ -11,13 +11,13 @@
         <mat-form-field>
           <mat-label>Email</mat-label>
           <input matInput formControlName="email" type="email">
-          <mat-error *ngIf="f.email.errors?.required">Email is required</mat-error>
-          <mat-error *ngIf="f.email.errors?.email">Email is not valid</mat-error>
+          <!-- <mat-error *ngIf="f.email.errors?.required">Email is required</mat-error>
+          <mat-error *ngIf="f.email.errors?.email">Email is not valid</mat-error> -->
         </mat-form-field>
         <mat-form-field>
           <mat-label>Password</mat-label>
           <input matInput formControlName="password" type="password">
-          <mat-error *ngIf="f.password.errors?.required">Password is required</mat-error>
+          <!-- <mat-error *ngIf="f.password.errors?.required">Password is required</mat-error> -->
         </mat-form-field>
         <button mat-raised-button color="primary" type="submit">Login</button>
       </form>

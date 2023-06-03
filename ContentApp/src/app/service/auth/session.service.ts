@@ -4,8 +4,7 @@ import { Observable, Subject, catchError, of } from 'rxjs';
 import { FirebaseUser } from '../../model/user/user.model';
 import { FirebaseUISignInSuccessWithAuthResult } from 'firebaseui-angular';
 import { FireAuthRepository } from '../../repository/firebase/fireauth.repo';
-
-const LANGUAGE_PREF = 'language';
+import { AngularFireDatabase } from '@angular/fire/compat/database';
 
 @Injectable({
   providedIn: 'root',
@@ -15,56 +14,48 @@ export class SessionService {
   
   constructor(
     private fireAuthRepo: FireAuthRepository,
-    private navService: NavigationService
+    private navigationService: NavigationService
     ) {
       /** */
     }
 
   checkForAuthLoginRedirect() {
-    // if (this.fireAuthRepo.sessionUser !== null) {
-    //   this.navService.navigateToList();
-    //   return;
-    // }
+    if (this.fireAuthRepo.sessionUser !== null) {
+      // this.navService.navigateToList();
+      return;
+    }
 
-    // this.fireAuthRepo.getUserAuthObservable().subscribe({
-    //   next: (user) => {
-    //     if (user !== null) {
-    //       this.navService.navigateToList();
-    //     }
-    //   },
-    //   error: (error) => {
-    //     console.log('🔥' + error);
-    //     this.errorSubject.next(error);
-    //   }
-    // });
+    this.fireAuthRepo.getUserAuthObservable().subscribe({
+      next: (user) => {
+        if (user !== null) {
+          // this.navService.navigateToList();
+        }
+      },
+      error: (error) => {
+        console.log('🔥' + error);
+        this.errorSubject.next(error);
+      }
+    });
   }
 
   checkForAuthLogoutRedirect() {
-    // if (this.fireAuthRepo.sessionUser === null) {
-    //   console.log("🚀 ~ file: session.service.ts:35 ~ SessionService ~ this.fireAuthRepo.getUserAuthObservable ~ user:", this.fireAuthRepo.sessionUser)
-    //   this.navService.navigateToLander();
-    //   return;
-    // } else {
-    //   this.navService.navigateToList();
-    // }
+    if (this.fireAuthRepo.sessionUser === null) {
+      console.log("🚀 ~ file: session.service.ts:35 ~ SessionService ~ this.fireAuthRepo.getUserAuthObservable ~ user:", this.fireAuthRepo.sessionUser)
+      // this.navService.navigateToLander();
+      return;
+    } else {
+      // this.navService.navigateToList();
+    }
   }
 
   getErrorObserver(): Observable<string> {
     return this.errorSubject.asObservable();
   }
 
-  storeLanguagePref(lang: string): void {
-    localStorage.setItem(LANGUAGE_PREF, lang);
-  }
-
   getProfilePic(): string {
     return (
       this.fireAuthRepo.sessionUser?.photoURL ?? 'https://placehold.co/48x48'
     );
-  }
-
-  getLanguagePref(): string | null {
-    return localStorage.getItem(LANGUAGE_PREF);
   }
 
   getAuthStateObserver(): Observable<FirebaseUser> {
@@ -86,7 +77,7 @@ export class SessionService {
                 isVirgin: isFirstTimeUser
               }
             );
-            this.navService.navigateToList();
+            // this.navService.navigateToList();
           } else {
             this.fireAuthRepo.signOut();
             this.errorSubject.next(

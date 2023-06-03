@@ -5,8 +5,7 @@ import {
 } from 'firebase/storage';
 import { Injectable } from '@angular/core';
 import { from, map, Observable, of } from 'rxjs';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { TranslateService } from '@ngx-translate/core';
+import { FirebaseStorage } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root',
@@ -14,28 +13,27 @@ import { TranslateService } from '@ngx-translate/core';
 export class FirebaseStorageRepository {
 
   constructor(
-    private translate: TranslateService,
-    private storage: AngularFireStorage
+    // private storage: FirebaseStorage
   ) {}
 
-  getSampleVoices(): Observable<{ name: string, sampleUrl: string }[]> {
-    const language = this.translate.currentLang;
-    let voicesSampleRef = this.storage.ref('voice_samples').child(language);
-    return from(voicesSampleRef.listAll()).pipe(
-      map(list => {
-        const urlMap: { name: string, sampleUrl: string }[] = [];
-        list.items.forEach(itemRef => {
-          itemRef.getDownloadURL().then(url => {
-            urlMap.push({
-              name: itemRef.name.replace('.mp3', ''), 
-              sampleUrl: url
-            });
-          });
-        });
-        return urlMap;
-      })
-    );
-  }
+  // getSampleVoices(): Observable<{ name: string, sampleUrl: string }[]> {
+  //   const language = this.translate.currentLang;
+  //   let voicesSampleRef = this.storage.ref('voice_samples').child(language);
+  //   return from(voicesSampleRef.listAll()).pipe(
+  //     map(list => {
+  //       const urlMap: { name: string, sampleUrl: string }[] = [];
+  //       list.items.forEach(itemRef => {
+  //         itemRef.getDownloadURL().then(url => {
+  //           urlMap.push({
+  //             name: itemRef.name.replace('.mp3', ''), 
+  //             sampleUrl: url
+  //           });
+  //         });
+  //       });
+  //       return urlMap;
+  //     })
+  //   );
+  // }
 
   getDownloadURL(ref: StorageReference): Observable<string> {
     return from(getDownloadURL(ref)
