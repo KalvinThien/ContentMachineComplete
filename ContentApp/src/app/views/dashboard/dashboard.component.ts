@@ -10,4 +10,5 @@ export class DashboardComponent {
   viewDate: Date = new Date();
   events: CalendarEvent[] = [ /** */ ];
 
+  constructor() { /** */ }
 }

@@ -1,8 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   Router,
-  createUrlTreeFromSnapshot,
 } from '@angular/router';
 import { FireAuthRepository } from '../../repository/firebase/fireauth.repo';
 import { map } from 'rxjs';
