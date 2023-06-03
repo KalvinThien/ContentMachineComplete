@@ -4,44 +4,51 @@
 </header> -->
 
 <script>
-  window.fbAsyncInit = function() {
+  window.fbAsyncInit = function () {
     FB.init({
-      appId            : '883874189493049',
-      autoLogAppEvents : true,
-      xfbml            : true,
-      version          : 'v17.0'
+      appId: '883874189493049',
+      autoLogAppEvents: true,
+      xfbml: true,
+      version: 'v17.0'
     });
   };
 </script>
 <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk/debug.js"></script>
 <!-- Production script -->
 <!-- <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script> -->
-    
+
 
 <!-- Navigation bar -->
-<nav>
-  <a class="button"
-     routerLink="/login"
-     routerLinkActive="activebutton"
-     ariaCurrentWhenActive="page">
-    Login
-  </a> | 
-  <a class="button"
-     routerLink="/dashboard"
-     routerLinkActive="activebutton"
-     ariaCurrentWhenActive="page">
-    Dashboard
-  </a>
-</nav>
+<p-menubar [model]="items">
+  <ng-template pTemplate="start">
+    <div class="horizontal-container">
+      <img src="https://primefaces.org/cdn/primeng/images/primeng.svg" height="40" class="mr-2" />
+      <h3>Content Calendar</h3>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="end">
+    <div class="horizontal-container">
+      <p-button icon="pi pi-calendar"
+        styleClass="p-button-rounded p-button-secondary p-button-text"
+        (click)="onCalendarClick()"></p-button>
+      <p-button icon="pi pi-user"
+        styleClass="p-button-rounded p-button-secondary p-button-text"
+        (click)="onAccountsClick()"></p-button>
+      <p-button icon="pi pi-power-off"
+        styleClass="p-button-rounded p-button-danger p-button-text"
+        (click)="onLogoutClick()"></p-button>
+    </div>
+  </ng-template>
+</p-menubar>
 
 <!-- Begin Dashboard Code -->
 <!-- SIDEBAR -->
-<section id="sidebar" [ngClass]="status ? 'hide' : ''">
+<!-- <section id="sidebar" [ngClass]="status ? 'hide' : ''">
   <a href="#" class="brand">
     <i class='bx bxs-smile'></i>
     <span class="text">Content Machine</span>
   </a>
-  <!-- This is where we put our content list of upcoming -->
+ This is where we put our content list of upcoming 
   <ul class="side-menu top">
     <li class="active">
       <a href="#">
@@ -52,7 +59,7 @@
     <li>
       <a href="#">
         <i class='bx bxs-doughnut-chart' ></i>
-        <span class="text">Accounts</span>
+        <span class="text">Analytics</span>
       </a>
     </li>
     <li>
@@ -60,7 +67,7 @@
   <ul class="side-menu">
     <li>
       <a href="#">
-        <i class='bx bxs-cog'></i>
+        <i class='bx bxs-cog' ></i>
         <span class="text">Settings</span>
       </a>
     </li>
@@ -72,11 +79,8 @@
     </li>
   </ul>
 </section>
-<!-- SIDEBAR -->
 
-<!-- CONTENT -->
 <section id="content">
-  <!-- NAVBAR -->
   <nav>
     <i (click)="addToggle()" class='bx bx-menu' ></i>
     <a href="#" class="nav-link">Categories</a>
@@ -93,10 +97,10 @@
     <a href="#" class="profile">
       <img src="https://secure.gravatar.com/avatar/d09eaad01aea86c51b4f892b4f8abf6f?s=100&d=wavatar&r=g">
     </a>
-  </nav>
-  <!-- NAVBAR -->
-  <!-- MAIN -->
-  <router-outlet></router-outlet>
-  <!-- MAIN -->
-</section>
+  </nav> -->
+<!-- NAVBAR -->
+<!-- MAIN -->
+<router-outlet></router-outlet>
+<!-- MAIN -->
+<!-- </section> -->
 <!-- CONTENT -->

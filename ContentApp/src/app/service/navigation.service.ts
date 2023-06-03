@@ -10,8 +10,12 @@ export class NavigationService {
     /** */
   }
   
-  navigateToDashboard() {
-    this.router.navigate(['dashboard']);
+  navigateToCalendar() {
+    this.router.navigate(['calendar']);
+  }
+
+  navigateToLogin() {
+    this.router.navigate(['login']);
   }
   
   // navigateToCopyCat() {

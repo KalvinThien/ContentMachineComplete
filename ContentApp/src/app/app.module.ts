@@ -1,15 +1,13 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HammerModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import { MatCardModule } from '@angular/material/card';
 import { LoginComponent } from './views/login/login.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule} from '@angular/material/form-field';
-import { MatDialogModule } from '@angular/material/dialog';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -19,6 +17,10 @@ import { CalendarComponent } from './views/calendar/calendar.component';
 import { PageNotFoundComponent } from './views/page-not-found/page-not-found.component';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { HomeComponent } from './views/home/home.component';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
+import { MenubarModule } from 'primeng/menubar';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -26,26 +28,6 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
   signInFlow: 'popup',
   signInOptions: [
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-    // {
-    //   scopes: [
-    //     'instagram_basic',
-    //     'instagram_manage_comments',
-    //     'instagram_manage_insights',
-    //     'instagram_content_publish',
-    //     'publish_video',
-    //     'page_events',
-    //     'pages_read_engagement',
-    //     'pages_manage_metadata',
-    //     'pages_read_user_content',
-    //     'pages_manage_ads',
-    //     'pages_manage_posts',
-    //     'pages_manage_engagement',
-    //   ],
-    //   customParameters: {
-    //     'auth_type': 'reauthenticate'
-    //   },
-    //   provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID
-    // },
     firebase.auth.TwitterAuthProvider.PROVIDER_ID,
     {
       requireDisplayName: false,
@@ -67,15 +49,17 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     HomeComponent
   ],
   imports: [
+    MenubarModule,
+    DialogModule,
+    ButtonModule,
+    CardModule,
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
-    CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory }),
     HammerModule,
-    MatCardModule,
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatDialogModule,
+    CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory }),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),

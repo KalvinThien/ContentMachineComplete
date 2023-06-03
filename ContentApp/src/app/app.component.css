@@ -21,3 +21,13 @@
   color: #ffffff;
   text-shadow: 0 1px 0 #528ecc;
 }
+
+.horizontal-container {
+  display: flex;
+  align-items: center;
+}
+
+.horizontal-container img,
+.horizontal-container div {
+  margin-right: 10px;
+}

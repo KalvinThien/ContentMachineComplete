@@ -26,7 +26,7 @@ export class SessionService {
 
   checkForAuthLoginRedirect() {
     if (this.fireAuthRepo.sessionUser !== null) {
-      this.navigationService.navigateToDashboard();
+      this.navigationService.navigateToCalendar();
       return;
     }
 
@@ -100,7 +100,7 @@ export class SessionService {
               // isVirgin: isFirstTimeUser,
             });
             //
-            this.navigationService.navigateToDashboard();
+            this.navigationService.navigateToCalendar();
             //
           } else {
             this.fireAuthRepo.signOut();
