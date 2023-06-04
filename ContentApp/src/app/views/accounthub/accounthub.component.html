@@ -1,4 +1,28 @@
   <p-tabView styleClass="tabview-custom">
+    <p-tabPanel header="twitter">
+      <ng-template pTemplate="header">
+        <i class="pi pi-twitter"></i>
+        <span>Twitter</span>
+      </ng-template>
+      <div class="container">
+        <div class="column" style="padding: 0.5rem;">
+          <p>
+            Grant our app access to your Twitter account and take your tweeting game to the next level. With automated posting, you can schedule and publish tweets effortlessly, ensuring consistent engagement with your followers. Say goodbye to the hassle of manual tweeting and hello to effortless social media management!
+          </p>
+            <p-footer>
+              <button 
+                pButton type="button" 
+                label="Connect" 
+                icon="pi pi-plus" 
+                styleClass="p-button-info"
+                (click)="onTwitterLogin()"></button>
+            </p-footer>
+        </div>
+        <div class="column">
+          <img src="assets/images/twitter_sample.png" alt="facebook" style="width: 20vw; height: 7vw; " />
+        </div>
+      </div>
+    </p-tabPanel>
     <p-tabPanel header="facebook">
       <ng-template pTemplate="header">
         <i class="pi pi-facebook"></i>
@@ -30,15 +54,6 @@
       </ng-template>
       <p>
         Connect our app to your Medium account and simplify the process of publishing your articles. With automated posting, you can effortlessly schedule and share your content, reaching a wider audience with ease. Let us handle the logistics while you focus on crafting captivating stories!
-      </p>
-    </p-tabPanel>
-    <p-tabPanel header="twitter">
-      <ng-template pTemplate="header">
-        <i class="pi pi-twitter"></i>
-        <span>Twitter</span>
-      </ng-template>
-      <p>
-        Grant our app access to your Twitter account and take your tweeting game to the next level. With automated posting, you can schedule and publish tweets effortlessly, ensuring consistent engagement with your followers. Say goodbye to the hassle of manual tweeting and hello to effortless social media management!
       </p>
     </p-tabPanel>
     <p-tabPanel header="youtube">

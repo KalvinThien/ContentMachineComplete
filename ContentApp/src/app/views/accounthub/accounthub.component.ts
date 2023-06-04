@@ -22,6 +22,9 @@ export class AccounthubComponent implements OnInit {
     this.socialAuthService.signInWithFacebook();
   }
   
+  onTwitterLogin() {
+    this.socialAuthService.signInWithTwitter();
+  }
 }
 
 

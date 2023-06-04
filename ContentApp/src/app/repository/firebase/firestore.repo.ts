@@ -5,20 +5,46 @@ import { FireAuthRepository } from './fireauth.repo';
 import { Injectable } from '@angular/core';
 import { Observable, from, of } from 'rxjs';
 
-export const USERS_COL = 'users';
+/**
+ * Collection and Docuemnts Architecture
+ */
 export const PURCHASED_USERS_COL = 'purchased_users';
+
+export const USERS_COL = 'users';
+export const USER_SOCIAL_MEDIA_HANDLES_DOC = 'social_media_handles';
+export const USER_OAUTH_2_KEYS_DOC = 'oAuth2Keys';
+
+export const PostingPlatform = {
+  FACEBOOK: 'facebook',
+  INSTAGRAM: 'instagram',
+  TWITTER: 'twitter',
+  YOUTUBE: 'youtube',
+  MEDIUM: 'medium',
+  TIKTOK: 'tiktok',
+  LINKEDIN: 'linkedin'
+}
+
+/**
+ * Accounts and Oauth 2.0
+ */
+export const ACCESS_TOKEN = 'access_token';
+export const LAST_LOGIN_AT = 'last_login_at';
+export const CREATION_TIME = 'creation_time';
+export const REFRESH_TOKEN = 'refresh_token';
+export const SCOPE = 'scopes';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirestoreRepository {
+
   constructor(
     private firestore: Firestore,
     private fireAuth: FireAuthRepository
   ) {}
 
   // Create a single data object under a user ID
-  async createUsersDocument<T>(
+  async createUserDocument<T>(
     collectionPath: string,
     data: T,
     userId: string = this.fireAuth.sessionUser?.uid || ''
@@ -31,7 +57,7 @@ export class FirestoreRepository {
     // The initial creation of our object and the update of the ID
     setDoc(userDocRef, this.sanitizeObject(data));
     data = this.update(data, 'id', userDocRef.id);
-    await this.updateUsersDocument<T>(
+    await this.updateUsersCollectionDocument<T>(
       collectionPath,
       userDocRef.id,
       data
@@ -145,6 +171,42 @@ export class FirestoreRepository {
   }
 
   /**
+   * Only for creating a top level property entry
+   * @param collectionPath 
+   * @param documentKey 
+   * @param data 
+   * @param userId 
+   * @returns 
+   */
+  async updateSpecificUserDocument<T>(
+    data: Partial<T>
+  ): Promise<boolean> {
+    if (this.fireAuth.sessionUser == null) {
+      return new Promise<boolean>((resolve, reject) => { resolve(false) });
+    }
+    const collectionRef = collection(this.firestore, USERS_COL);
+    const usersRef = doc(collectionRef, this.fireAuth.sessionUser.uid);
+    
+    return new Promise<boolean>((resolve, reject) => {
+      updateDoc(usersRef, this.sanitizeObject(data))
+        .then(() => {
+          if (!environment.production) {
+            console.groupCollapsed(
+              `❤️‍🔥 Firestore Service [${usersRef.path}] [updateUserDocument]`
+            );
+            console.log(`❤️‍🔥 [${ usersRef.path }]`, data);
+            console.groupEnd();
+          }
+          resolve(true); // Resolving the Promise with a boolean value indicating success
+        })
+        .catch((error: any) => {
+          console.error('❤️‍🔥 Request failed', error);
+          resolve(false); // Resolving the Promise with a boolean value indicating failure
+        });
+    });
+  }
+
+  /**
    * Patch specific properties and objects as children of the single data object.
    * Keeping as a promise for internal use only
    * @param collectionPath 
@@ -153,12 +215,15 @@ export class FirestoreRepository {
    * @param userId 
    * @returns 
    */
-  async updateUsersDocument<T>(
+  async updateUsersCollectionDocument<T>(
     collectionPath: string,
     documentKey: string,
     data: Partial<T>
   ): Promise<boolean> {
-    const collectionRef = collection(this.firestore, collectionPath);
+    if (this.fireAuth.sessionUser == null) {
+      return new Promise<boolean>((resolve, reject) => { reject(false) });
+    }
+    const collectionRef = collection(this.firestore, USERS_COL, this.fireAuth.sessionUser.uid, collectionPath);
     const userDocRef = doc(collectionRef, documentKey);
     
     return new Promise<boolean>((resolve, reject) => {

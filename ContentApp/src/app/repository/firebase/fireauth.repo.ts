@@ -23,12 +23,13 @@ export class FireAuthRepository {
     
     this.user$.subscribe((user: any) => {
       if (user) {
-        console.log(
-          '🚀 ~ file: fireauth.repo.ts:28 ~ FireAuthRepository ~ this.angularFireAuth.authState.subscribe ~ user:',
-          user
-        );
-        this.sessionUser = user;
-        this.userSubject.next(user);
+        // Only our initial user is set for the session variable
+        if (user.providerData[0].providerId == 'google.com') {
+          this.sessionUser = user;
+          this.userSubject.next(user);
+        } else {
+          
+        }
       } else {
         this.sessionUser = undefined;
       }

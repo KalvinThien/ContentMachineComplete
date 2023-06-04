@@ -145,11 +145,11 @@ export class SessionService {
         console.log("🚀 ~ file: session.service.ts:144 ~ SessionService ~ this.firestoreRepo.getUsersDocument<DocumentReference> ~ doc:", doc)
         // User exists, update the existing user data
         // userData.isVirgin = false;
-        this.firestoreRepo.updateUsersDocument(USERS_COL, user.uid, userData);
+        this.firestoreRepo.updateSpecificUserDocument(userData);
       } else {
         console.log("🚀 ~ file: session.service.ts:149 ~ SessionService ~ this.firestoreRepo.getUsersDocument<DocumentReference> ~ doc:", 'doc doesnt exist')
         // User doesn't exist, create a new user document
-        this.firestoreRepo.createUsersDocument(USERS_COL, userData, user.uid);
+        this.firestoreRepo.createUserDocument(USERS_COL, userData, user.uid);
       }
     });
   }

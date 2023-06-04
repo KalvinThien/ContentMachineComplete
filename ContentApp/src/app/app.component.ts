@@ -33,20 +33,4 @@ export class AppComponent {
   onLogoutClick() {
     this.navigationService.navigateToLogin();
   }
-
-  onMediumAuthClick() {
-    throw new Error('Method not implemented.');
-  }
-  onFacebookAuthClick() {
-    throw new Error('Method not implemented.');
-  }
-  onTwitterAuthClick() {
-    throw new Error('Method not implemented.');
-  }
-  onYoutubeAuthClick() {
-    throw new Error('Method not implemented.');
-  }
-  onLinkedInAuthClick() {
-    throw new Error('Method not implemented.');
-  }
 }

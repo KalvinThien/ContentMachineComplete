@@ -1,15 +1,19 @@
 import { Injectable } from "@angular/core";
-import {
-  SocialAuthService,
-  FacebookLoginProvider,
-  SocialUser,
-} from '@abacritt/angularx-social-login';
+import { FacebookAuthProvider, getAuth, signInWithPopup, TwitterAuthProvider } from "firebase/auth";
 import { Subject } from "rxjs";
+import { FirestoreRepository } from "../repository/firebase/firestore.repo";
+import { firebase } from "firebaseui-angular";
+import { USER_SOCIAL_MEDIA_HANDLES_DOC, USER_OAUTH_2_KEYS_DOC, PostingPlatform } from "../repository/firebase/firestore.repo";
+import { ACCESS_TOKEN, LAST_LOGIN_AT, CREATION_TIME, REFRESH_TOKEN, SCOPE as SCOPES } from "../repository/firebase/firestore.repo";
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocialAccountService {
+
+  private auth = getAuth();
+  private facebookProvider = new FacebookAuthProvider();
+  private twitterProvider = new TwitterAuthProvider();
 
   private facebookAuthSubject = new Subject<boolean>();
   private mediumAuthSubject = new Subject<boolean>();
@@ -17,13 +21,19 @@ export class SocialAccountService {
   private youtubeAuthSubject = new Subject<boolean>();
   private linkedinAuthSubject = new Subject<boolean>();
 
+  private errorSubject = new Subject<string>();
+
+  private facebookScopes = [];
+  private mediumScopes = [];
+  private twitterScopes = [];
+  private youtubeScopes = [];
+
   constructor(
-    private socialAuthService: SocialAuthService
+    private firestoreRepo: FirestoreRepository
   ) { 
-    this.socialAuthService.authState.subscribe((user) => {
-      console.log("🚀 ~ file: socialaccount.service.ts:24 ~ SocialAccountService ~ this.socialAuthService.authState.subscribe ~ user:", user)
-      // this.socialUser = user;
-      // this.isLoggedin = user != null;
+    this.facebookProvider.addScope('user_birthday');
+    this.facebookProvider.setCustomParameters({
+      'display': 'popup'
     });
   }
 
@@ -33,8 +43,48 @@ export class SocialAccountService {
   getYoutubeAuthObservable() { return this.youtubeAuthSubject.asObservable(); }
   getLinkedinAuthObservable() { return this.linkedinAuthSubject.asObservable(); }
 
+  getErrorObservable() { return this.errorSubject.asObservable(); }
+
+  /**
+   * This is not working except in HTTPS published
+   */
   signInWithFacebook() {
-    this.socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID);
+    signInWithPopup(this.auth, this.facebookProvider)
+  .then((result) => {
+    // The signed-in user info.
+    const user = result.user;
+    console.log("🚀 ~ file: socialaccount.service.ts:39 ~ SocialAccountService ~ .then ~ user:", user)
+
+    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+    const credential = FacebookAuthProvider.credentialFromResult(result);
+
+    if (credential !== null) {
+      const accessToken = credential.accessToken;
+      console.log("🚀 ~ file: socialaccount.service.ts:48 ~ SocialAccountService ~ .then ~ accessToken:", accessToken)
+
+      // If we have credentials we will sign in explicityly to Facebook so we can get a long-lived token
+      // If you need to continuously use the Facebook API, use option 2 as Firebase does not manage OAuth 
+      //tokens after they expire. If you just need Facebook data on sign-in, then use option 1.
+      firebase.auth().signInWithCredential(credential).then((userCredential) => {
+        console.log("🚀 ~ file: socialaccount.service.ts:51 ~ SocialAccountService ~ firebase.auth ~ userCredential:", userCredential)
+      }).catch((error) => {
+        console.log("🚀 ~ file: socialaccount.service.ts:53 ~ SocialAccountService ~ firebase.auth ~ error:", error)
+      });
+    }
+
+    // IdP data available using getAdditionalUserInfo(result)
+    // ...
+  })
+  .catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // The email of the user's account used.
+    const email = error.customData.email;
+    // The AuthCredential type that was used.
+    const credential = FacebookAuthProvider.credentialFromError(error);
+    // ...
+  });
   }
 
   signInWithMedium() {
@@ -42,7 +92,57 @@ export class SocialAccountService {
   }
 
   signInWithTwitter() {
-    // this.socialAuthService.signIn(TwitterLoginProvider.PROVIDER_ID);
+
+    signInWithPopup(this.auth, this.twitterProvider)
+      .then((result) => {
+        const resultUser = result.user;
+        // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
+        // You can use these server side with your app's credentials to access the Twitter API.
+        const credential = TwitterAuthProvider.credentialFromResult(result);
+        if (credential !== null) {
+          const token = credential.accessToken;
+          const secret = credential.secret;
+
+          this.firestoreRepo.updateSpecificUserDocument({
+            [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
+              [PostingPlatform.TWITTER]: resultUser?.displayName || '',
+            },
+          });
+
+          const oAuth2Payload = {
+            [ACCESS_TOKEN]: token,
+            [REFRESH_TOKEN]: secret,
+            [SCOPES]: this.twitterScopes,
+            [LAST_LOGIN_AT]: resultUser.metadata.lastSignInTime,
+            [CREATION_TIME]: resultUser.metadata.creationTime,
+          };
+
+          this.firestoreRepo.updateUsersCollectionDocument(
+            USER_OAUTH_2_KEYS_DOC,
+            PostingPlatform.TWITTER,
+            oAuth2Payload
+          );
+        } else {
+          console.log("🚀 ~ file: socialaccount.service.ts:126 ~ SocialAccountService ~ .then ~ oAuth2Payload:", 'credential error')
+          this.errorSubject.next('Twitter Auth Error');
+        }
+
+        // The signed-in user info.
+        const user = result.user;
+        console.log("🚀 ~ file: socialaccount.service.ts:134 ~ SocialAccountService ~ .then ~ user:", user)
+        // IdP data available using getAdditionalUserInfo(result)
+        // ...
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The AuthCredential type that was used.
+        const credential = TwitterAuthProvider.credentialFromError(error);
+        // ...
+      });
   }
 
   signInWithYoutube() {
