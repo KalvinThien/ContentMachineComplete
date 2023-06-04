@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { NavigationService } from '../navigation.service';
+import { NavigationService } from './navigation.service';
 import { Observable, Subject, catchError, map, of } from 'rxjs';
-import { FirebaseUser } from '../../model/user/user.model';
-import { FireAuthRepository } from '../../repository/firebase/fireauth.repo';
+import { FirebaseUser } from '../model/user/user.model';
+import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
 import { User } from '@angular/fire/auth';
 import { FirestoreRepository, PURCHASED_USERS_COL, USERS_COL } from 'src/app/repository/firebase/firestore.repo';
 import { DocumentReference } from '@angular/fire/firestore';

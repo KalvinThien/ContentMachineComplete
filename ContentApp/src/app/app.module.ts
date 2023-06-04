@@ -21,6 +21,14 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { MenubarModule } from 'primeng/menubar';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { DividerModule } from 'primeng/divider';
+import { SocialLoginModule, 
+  SocialAuthServiceConfig, 
+  FacebookLoginProvider 
+} from '@abacritt/angularx-social-login';
+import { TabViewModule } from 'primeng/tabview';
+import { AccounthubComponent } from './views/accounthub/accounthub.component';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -46,9 +54,13 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     ConfirmationDialogComponent,
     CalendarComponent,
     PageNotFoundComponent,
-    HomeComponent
+    HomeComponent,
+    AccounthubComponent
   ],
   imports: [
+    TabViewModule,
+    DividerModule,
+    ScrollPanelModule,
     MenubarModule,
     DialogModule,
     ButtonModule,
@@ -59,13 +71,27 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     HammerModule,
     FormsModule,
     ReactiveFormsModule,
+    SocialLoginModule,
     CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory }),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     FirebaseUIModule.forRoot(firebaseUiAuthConfig)
   ],
-  providers: [ /** */ ],
+  providers: [ 
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: FacebookLoginProvider.PROVIDER_ID,
+            provider: new FacebookLoginProvider('883874189493049'),
+          },
+        ],
+      } as SocialAuthServiceConfig,
+    },
+   ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

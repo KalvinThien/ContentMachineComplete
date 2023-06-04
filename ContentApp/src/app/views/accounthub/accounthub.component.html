@@ -1,0 +1,62 @@
+  <p-tabView styleClass="tabview-custom">
+    <p-tabPanel header="facebook">
+      <ng-template pTemplate="header">
+        <i class="pi pi-facebook"></i>
+        <span>Facebook</span>
+      </ng-template>
+      <div class="container">
+        <div class="column" style="padding: 0.5rem;">
+            <p>
+              To start automating your Facebook and Instagram posts and saving time, simply click the button below to grant our app access to your Facebook account. By doing so, you'll be able to schedule and publish posts seamlessly, without any manual intervention.
+            </p>
+            <p-footer>
+              <button 
+                pButton type="button" 
+                label="Connect" 
+                icon="pi pi-plus" 
+                styleClass="p-button-success"
+                (click)="onFacebookLogin()"></button>
+            </p-footer>
+        </div>
+        <div class="column">
+          <img src="assets/images/facebook_sample.png" alt="facebook" style="width: 20vw; height: 30vw; " />
+        </div>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="medium">
+      <ng-template pTemplate="header">
+        <i class="pi pi-pencil"></i>
+        <span>Medium</span>
+      </ng-template>
+      <p>
+        Connect our app to your Medium account and simplify the process of publishing your articles. With automated posting, you can effortlessly schedule and share your content, reaching a wider audience with ease. Let us handle the logistics while you focus on crafting captivating stories!
+      </p>
+    </p-tabPanel>
+    <p-tabPanel header="twitter">
+      <ng-template pTemplate="header">
+        <i class="pi pi-twitter"></i>
+        <span>Twitter</span>
+      </ng-template>
+      <p>
+        Grant our app access to your Twitter account and take your tweeting game to the next level. With automated posting, you can schedule and publish tweets effortlessly, ensuring consistent engagement with your followers. Say goodbye to the hassle of manual tweeting and hello to effortless social media management!
+      </p>
+    </p-tabPanel>
+    <p-tabPanel header="youtube">
+      <ng-template pTemplate="header">
+        <i class="pi pi-youtube"></i>
+        <span>Youtube</span>
+      </ng-template>
+      <p>
+        Grant our app access to your YouTube account and simplify your video uploading process. With automated posting, you can schedule and publish your videos seamlessly, ensuring they reach your subscribers at the right time. Maximize your YouTube presence with automated video uploads!
+      </p>
+    </p-tabPanel>
+    <p-tabPanel header="LinkedIn">
+      <ng-template pTemplate="header">
+        <i class="pi pi-linkedin"></i>
+        <span>LinkedIn</span>
+      </ng-template>
+      <p>
+        Connect our app to your LinkedIn account and streamline your professional networking efforts. With automated posting, you can schedule and share valuable content with your connections, establishing thought leadership and boosting your professional brand. Experience the ease of automated LinkedIn posts!
+      </p>
+    </p-tabPanel>
+  </p-tabView>

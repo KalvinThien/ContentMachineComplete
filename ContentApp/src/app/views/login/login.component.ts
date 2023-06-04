@@ -1,6 +1,6 @@
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SessionService } from '../../service/auth/session.service';
+import { SessionService } from '../../service/session.service';
 import { NavigationService } from '../../service/navigation.service';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';

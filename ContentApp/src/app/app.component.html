@@ -2,21 +2,8 @@
 <header>
   <h4>Welcome to the Money Printer</h4>
 </header> -->
-
-<script>
-  window.fbAsyncInit = function () {
-    FB.init({
-      appId: '883874189493049',
-      autoLogAppEvents: true,
-      xfbml: true,
-      version: 'v17.0'
-    });
-  };
-</script>
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk/debug.js"></script>
 <!-- Production script -->
 <!-- <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script> -->
-
 
 <!-- Navigation bar -->
 <p-menubar [model]="items">
@@ -41,6 +28,9 @@
   </ng-template>
 </p-menubar>
 
+<p-dialog header="Please Login To Your Socials" [(visible)]="accountsVisible" [modal]="true" [style]="{ width: '40vw' }" [draggable]="false" [resizable]="false">
+  <app-account-hub></app-account-hub>
+</p-dialog>
 <!-- Begin Dashboard Code -->
 <!-- SIDEBAR -->
 <!-- <section id="sidebar" [ngClass]="status ? 'hide' : ''">
