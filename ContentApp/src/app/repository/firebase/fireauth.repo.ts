@@ -11,7 +11,7 @@ import { DocumentReference } from '@angular/fire/firestore';
 })
 export class FireAuthRepository {
 
-  sessionUser?: FirebaseUser;
+  currentSessionUser?: FirebaseUser;
   user$;
 
   private userSubject: Subject<FirebaseUser> = new Subject<FirebaseUser>();
@@ -25,15 +25,16 @@ export class FireAuthRepository {
       if (user) {
         // Only our initial user is set for the session variable
         if (user.providerData[0].providerId == 'google.com') {
-          console.log('🚀 ~ file: fireauth.repo.ts ~ line 65 ~ FireAuthRepository ~ user', user)
-          this.sessionUser = user;
+          console.log('🚀 ~ file: fireauth.repo.ts ~ line 27 ~ FireAuthRepository ~ user', user)
+          this.currentSessionUser = user;
           this.userSubject.next(user);
         } else {
           // with poor design this is where we would make an advanced query to get the parent user based on child creds
         }
       } else {
         // reset sessionUser
-        this.sessionUser = undefined;
+        console.log('🚀 ~ file: fireauth.repo.ts ~ line 36 ~ FireAuthRepository ~ user', user)
+        this.currentSessionUser = undefined;
       }
     });
   }
@@ -43,16 +44,16 @@ export class FireAuthRepository {
   }
 
   isAuthenticated(): Observable<boolean> {
-    return of(this.sessionUser === undefined ? false : true);
+    return of(this.currentSessionUser === undefined ? false : true);
   }
 
   isFirstTimeUser(): Observable<boolean> {
-    return of(this.sessionUser?.isVirgin === true);
+    return of(this.currentSessionUser?.isVirgin === true);
   }
 
   // Sign out
   signOut(): Promise<void> {
-    this.sessionUser = undefined;
+    this.currentSessionUser = undefined;
     return this.fireAuth.signOut();
   }
 }

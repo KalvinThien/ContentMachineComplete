@@ -28,7 +28,7 @@ export class SessionService {
   }
 
   checkForAuthLoginRedirect() {
-    if (this.fireAuthRepo.sessionUser !== null) {
+    if (this.fireAuthRepo.currentSessionUser !== null) {
       this.navigationService.navigateToCalendar();
       return;
     }
@@ -47,10 +47,10 @@ export class SessionService {
   }
 
   checkForAuthLogoutRedirect() {
-    if (this.fireAuthRepo.sessionUser === null) {
+    if (this.fireAuthRepo.currentSessionUser === null) {
       console.log(
         '🚀 ~ file: session.service.ts:35 ~ SessionService ~ this.fireAuthRepo.getUserAuthObservable ~ user:',
-        this.fireAuthRepo.sessionUser
+        this.fireAuthRepo.currentSessionUser
       );
       // this.navService.navigateToLander();
       return;
@@ -94,7 +94,7 @@ export class SessionService {
 
   getProfilePic(): string {
     return (
-      this.fireAuthRepo.sessionUser?.photoURL ?? 'https://placehold.co/48x48'
+      this.fireAuthRepo.currentSessionUser?.photoURL ?? 'https://placehold.co/48x48'
     );
   }
 
@@ -157,14 +157,14 @@ export class SessionService {
     };
 
     // Check if the user document exists
-    this.firestoreRepo.getUsersDocument<DocumentReference>(USERS_COL, user.uid).subscribe((doc: DocumentReference) => {
+    this.firestoreRepo.getUsersDocument(USERS_COL, user.uid).subscribe((doc) => {
       if (doc !== undefined) {
-        console.log("🚀 ~ Updating user: "+ userData)
+        console.log("🚀 ~ Updating user")
         // User exists, update the existing user data
         // userData.isVirgin = false;
         this.firestoreRepo.updateCurrentUserDocument(userData);
       } else {
-        console.log("🚀 ~ Creating new user: "+ userData)
+        console.log("🚀 ~ Creating new user")
         console.log(user)
         // User doesn't exist, create a new user document
         this.firestoreRepo.createUserDocument(USERS_COL, userData, user.uid);

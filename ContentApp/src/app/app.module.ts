@@ -25,6 +25,7 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { DividerModule } from 'primeng/divider';
 import { TabViewModule } from 'primeng/tabview';
 import { AccounthubComponent } from './views/accounthub/accounthub.component';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -54,6 +55,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     AccounthubComponent
   ],
   imports: [
+    ProgressSpinnerModule,
     TabViewModule,
     DividerModule,
     ScrollPanelModule,

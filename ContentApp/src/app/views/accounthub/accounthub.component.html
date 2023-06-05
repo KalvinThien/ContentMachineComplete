@@ -10,16 +10,14 @@
             Grant our app access to your Twitter account and take your tweeting game to the next level. With automated posting, you can schedule and publish tweets effortlessly, ensuring consistent engagement with your followers. Say goodbye to the hassle of manual tweeting and hello to effortless social media management!
           </p>
             <p-footer>
-              <button 
-                pButton type="button" 
-                label="Connect" 
-                icon="pi pi-plus" 
-                styleClass="p-button-info"
-                (click)="onTwitterLogin()"></button>
+              <p-button label="Connect" icon="pi pi-plus" (click)="onTwitterLogin()" [disabled]="twitterConnected">
+                <p-progressSpinner *ngIf="isConnectionLoading" alt="loading" />
+              </p-button>
             </p-footer>
         </div>
         <div class="column">
-          <img src="assets/images/twitter_sample.png" alt="facebook" style="width: 20vw; height: 7vw; " />
+          
+          <img src="assets/images/twitter_sample.png" alt="twitter" style="width: 20vw; height: 7vw; " />
         </div>
       </div>
     </p-tabPanel>

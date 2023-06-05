@@ -131,3 +131,4 @@ ContentApp/pnpm-lock.yaml
 ContentApp/package-lock.json
 ContentApp/.editorconfig
 ContentApp/.vscode/
+ContentApp/appsecrets.ts
