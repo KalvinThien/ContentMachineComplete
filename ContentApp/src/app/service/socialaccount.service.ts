@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { FacebookAuthProvider, getAuth, signInWithPopup, TwitterAuthProvider } from "firebase/auth";
-import { Subject } from "rxjs";
+import { FacebookAuthProvider, getAuth, GoogleAuthProvider, OAuthCredential, signInWithPopup, TwitterAuthProvider } from "firebase/auth";
+import { Observable, Subject } from "rxjs";
 import { FirestoreRepository } from "../repository/firebase/firestore.repo";
 import { firebase } from "firebaseui-angular";
 import { USER_SOCIAL_MEDIA_HANDLES_DOC, USER_OAUTH_2_KEYS_DOC, PostingPlatform } from "../repository/firebase/firestore.repo";
@@ -12,6 +12,7 @@ import { ACCESS_TOKEN, LAST_LOGIN_AT, CREATION_TIME, REFRESH_TOKEN, SCOPE as SCO
 export class SocialAccountService {
 
   private auth = getAuth();
+  private googleProvider = new GoogleAuthProvider();
   private facebookProvider = new FacebookAuthProvider();
   private twitterProvider = new TwitterAuthProvider();
 
@@ -23,6 +24,7 @@ export class SocialAccountService {
 
   private errorSubject = new Subject<string>();
 
+  private googleScopes = [];
   private facebookScopes = [];
   private mediumScopes = [];
   private twitterScopes = [];
@@ -44,6 +46,39 @@ export class SocialAccountService {
   getLinkedinAuthObservable() { return this.linkedinAuthSubject.asObservable(); }
 
   getErrorObservable() { return this.errorSubject.asObservable(); }
+
+  signInWithGoogle(): Observable<any> {
+    return new Observable((subscriber) => {
+      signInWithPopup(this.auth, this.googleProvider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        // const token = credential.accessToken;
+
+        // The signed-in user info.
+        const user = result.user;
+        const sessionUser = {
+          ...user,
+          google_credentials: credential,
+        }
+        subscriber.next(sessionUser);
+        // IdP data available using getAdditionalUserInfo(result)
+        // ...
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+
+        subscriber.error(credential);
+        // ...
+      });
+    });
+  }
 
   /**
    * This is not working except in HTTPS published
@@ -103,7 +138,7 @@ export class SocialAccountService {
           const token = credential.accessToken;
           const secret = credential.secret;
 
-          this.firestoreRepo.updateSpecificUserDocument({
+          this.firestoreRepo.updateCurrentUserDocument({
             [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
               [PostingPlatform.TWITTER]: resultUser?.displayName || '',
             },
@@ -117,7 +152,7 @@ export class SocialAccountService {
             [CREATION_TIME]: resultUser.metadata.creationTime,
           };
 
-          this.firestoreRepo.updateUsersCollectionDocument(
+          this.firestoreRepo.updateCurrentUserCollectionDocument(
             USER_OAUTH_2_KEYS_DOC,
             PostingPlatform.TWITTER,
             oAuth2Payload

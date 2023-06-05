@@ -49,6 +49,8 @@ export class FirestoreRepository {
     data: T,
     userId: string = this.fireAuth.sessionUser?.uid || ''
   ): Promise<T> {
+    //USERS_COL, userData, user.uid
+    ///documents/users/6b9QvbnpIoZVHbb9l3fPcgbjQDg2/users/6b9QvbnpIoZVHbb9l3fPcgbjQDg2
     const usersRef =  collection(this.firestore, collectionPath);
     const userDocRef = doc(usersRef, userId);
     // const userDocsCollectionRef = collection(userRef, );
@@ -56,12 +58,8 @@ export class FirestoreRepository {
 
     // The initial creation of our object and the update of the ID
     setDoc(userDocRef, this.sanitizeObject(data));
-    data = this.update(data, 'id', userDocRef.id);
-    await this.updateUsersCollectionDocument<T>(
-      collectionPath,
-      userDocRef.id,
-      data
-    );
+    data = this.update(data, 'uid', userDocRef.id);
+    await this.updateCurrentUserDocument<T>(data);
     
     if (!environment.production) {
       console.groupCollapsed(
@@ -95,16 +93,16 @@ export class FirestoreRepository {
     if (userId === '') {
       return this.fireAuth.getUserAuthObservable().pipe(
         concatMap((user) => {
-          return this.getFocusedUsersDoc<T>(collectionPath, documentKey, user.uid);
+          return this.getSpecificUserDoc<T>(collectionPath, documentKey, user.uid);
         })
       );
     } else {
-      return this.getFocusedUsersDoc<T>(collectionPath, documentKey, userId);
+      return this.getSpecificUserDoc<T>(collectionPath, documentKey, userId);
     }
   }
 
 
-  private getFocusedUsersDoc<T>(
+  private getSpecificUserDoc<T>(
     collectionPath: string,
     documentKey: string,
     userId: string
@@ -128,22 +126,22 @@ export class FirestoreRepository {
     );
   }
 
-  getUsersCollection<T>(
+  getUserCollection<T>(
     collectionPath: string,
     userId: string = this.fireAuth.sessionUser?.uid || ''
   ): Observable<T[]> {
     if (userId === '') {
       return this.fireAuth.getUserAuthObservable().pipe(
         concatMap((user) => {
-          return this.getFocusedCollectionRef<T>(collectionPath, user.uid);
+          return this.getSpecificCollectionRef<T>(collectionPath, user.uid);
         })
       );
     } else {
-      return this.getFocusedCollectionRef<T>(collectionPath, userId);
+      return this.getSpecificCollectionRef<T>(collectionPath, userId);
     }
   }
 
-  private getFocusedCollectionRef<T>(
+  private getSpecificCollectionRef<T>(
     collectionPath: string,
     userId: string
   ): Observable<T[]> {
@@ -178,7 +176,7 @@ export class FirestoreRepository {
    * @param userId 
    * @returns 
    */
-  async updateSpecificUserDocument<T>(
+  async updateCurrentUserDocument<T>(
     data: Partial<T>
   ): Promise<boolean> {
     if (this.fireAuth.sessionUser == null) {
@@ -209,21 +207,21 @@ export class FirestoreRepository {
   /**
    * Patch specific properties and objects as children of the single data object.
    * Keeping as a promise for internal use only
-   * @param collectionPath 
+   * @param collectionKey 
    * @param documentKey 
    * @param data 
    * @param userId 
    * @returns 
    */
-  async updateUsersCollectionDocument<T>(
-    collectionPath: string,
+  async updateCurrentUserCollectionDocument<T>(
+    collectionKey: string,
     documentKey: string,
     data: Partial<T>
   ): Promise<boolean> {
     if (this.fireAuth.sessionUser == null) {
       return new Promise<boolean>((resolve, reject) => { reject(false) });
     }
-    const collectionRef = collection(this.firestore, USERS_COL, this.fireAuth.sessionUser.uid, collectionPath);
+    const collectionRef = collection(this.firestore, USERS_COL, this.fireAuth.sessionUser.uid, collectionKey);
     const userDocRef = doc(collectionRef, documentKey);
     
     return new Promise<boolean>((resolve, reject) => {

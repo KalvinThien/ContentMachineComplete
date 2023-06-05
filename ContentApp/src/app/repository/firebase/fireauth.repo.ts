@@ -25,12 +25,14 @@ export class FireAuthRepository {
       if (user) {
         // Only our initial user is set for the session variable
         if (user.providerData[0].providerId == 'google.com') {
+          console.log('🚀 ~ file: fireauth.repo.ts ~ line 65 ~ FireAuthRepository ~ user', user)
           this.sessionUser = user;
           this.userSubject.next(user);
         } else {
-          
+          // with poor design this is where we would make an advanced query to get the parent user based on child creds
         }
       } else {
+        // reset sessionUser
         this.sessionUser = undefined;
       }
     });
