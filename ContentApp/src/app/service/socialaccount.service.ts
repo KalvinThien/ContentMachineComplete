@@ -1,17 +1,46 @@
-import { Injectable } from "@angular/core";
-import { FacebookAuthProvider, getAuth, GoogleAuthProvider, OAuthCredential, signInWithCredential, signInWithPopup, TwitterAuthProvider } from "firebase/auth";
-import { catchError, concatMap, from, map, Observable, Subject, switchMap } from "rxjs";
-import { FirestoreRepository, USERS_COL } from "../repository/firebase/firestore.repo";
-import { firebase } from "firebaseui-angular";
-import { USER_SOCIAL_MEDIA_HANDLES_DOC, USER_OAUTH_2_KEYS_DOC, PostingPlatform } from "../repository/firebase/firestore.repo";
-import { ACCESS_TOKEN, LAST_LOGIN_AT, CREATION_TIME, REFRESH_TOKEN, SCOPE as SCOPES } from "../repository/firebase/firestore.repo";
-import { FireAuthRepository } from "../repository/firebase/fireauth.repo";
+import { Injectable } from '@angular/core';
+import {
+  FacebookAuthProvider,
+  getAuth,
+  GoogleAuthProvider,
+  OAuthCredential,
+  signInWithCredential,
+  signInWithPopup,
+  TwitterAuthProvider,
+} from 'firebase/auth';
+import {
+  catchError,
+  concatMap,
+  from,
+  map,
+  Observable,
+  Subject,
+  switchMap,
+} from 'rxjs';
+import {
+  FirestoreRepository,
+  USERS_COL,
+} from '../repository/firebase/firestore.repo';
+import { firebase } from 'firebaseui-angular';
+import {
+  USER_SOCIAL_MEDIA_HANDLES_DOC,
+  USER_OAUTH_2_KEYS_DOC,
+  PostingPlatform,
+} from '../repository/firebase/firestore.repo';
+import {
+  ACCESS_TOKEN,
+  LAST_LOGIN_AT,
+  CREATION_TIME,
+  REFRESH_TOKEN,
+  SCOPE as SCOPES,
+} from '../repository/firebase/firestore.repo';
+import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
+import { YoutubeAuthRepository } from '../repository/youtubeauth.repo';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocialAccountService {
-
   private auth = getAuth();
 
   private googleProvider = new GoogleAuthProvider();
@@ -21,7 +50,6 @@ export class SocialAccountService {
   private facebookAuthSubject = new Subject<boolean>();
   private mediumAuthSubject = new Subject<boolean>();
   private twitterAuthSubject = new Subject<boolean>();
-  private youtubeAuthSubject = new Subject<boolean>();
   private linkedinAuthSubject = new Subject<boolean>();
 
   private conectionsLoadingSubject = new Subject<boolean>();
@@ -34,13 +62,14 @@ export class SocialAccountService {
     'tweet.read',
     'tweet.write',
     'tweet.delete',
-    'follows.write'
+    'follows.write',
   ];
   private youtubeScopes = [];
 
   constructor(
     private fireAuthRepo: FireAuthRepository,
-    private firestoreRepo: FirestoreRepository
+    private firestoreRepo: FirestoreRepository,
+    private youtubeAuthRepo: YoutubeAuthRepository
   ) {
     this.facebookProvider.addScope('user_birthday');
     this.facebookProvider.setCustomParameters({
@@ -51,11 +80,48 @@ export class SocialAccountService {
   getFacebookAuthObservable$ = this.facebookAuthSubject.asObservable();
   getMediumAuthObservable$ = this.mediumAuthSubject.asObservable();
   getTwitterAuthObservable$ = this.twitterAuthSubject.asObservable();
-  getYoutubeAuthObservable$ = this.youtubeAuthSubject.asObservable();
   getLinkedinAuthObservable$ = this.linkedinAuthSubject.asObservable();
 
-  getConnectionLoadingObservable$ = this.conectionsLoadingSubject.asObservable();
+  getConnectionLoadingObservable$ =
+    this.conectionsLoadingSubject.asObservable();
   getErrorObservable$ = this.errorSubject.asObservable();
+
+  getYoutubeAuthObservable$: Observable<boolean> =
+    this.youtubeAuthRepo.tokenResponseObserver$.pipe(
+      map((tokenResponse) => {
+        const oAuth2Payload = {
+          [ACCESS_TOKEN]: tokenResponse,
+        };
+
+        this.firestoreRepo.updateCurrentUserCollectionDocument(
+          USER_OAUTH_2_KEYS_DOC,
+          PostingPlatform.YOUTUBE,
+          oAuth2Payload
+        );
+        console.log(
+          '🚀 ~ file: socialaccount.service.ts:74 ~ SocialAccountService ~ map ~ tokenResponse:',
+          tokenResponse
+        );
+        return tokenResponse;
+      }),
+      concatMap((tokenResponse) =>
+        this.youtubeAuthRepo.getChannels(tokenResponse)
+      ),
+      concatMap((channelResponse) => {
+        console.log(
+          '🚀 ~ file: socialaccount.service.ts:76 ~ SocialAccountService ~ channelResponse:',
+          channelResponse
+        );
+        return this.firestoreRepo.updateCurrentUserDocument({
+          [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
+            [PostingPlatform.YOUTUBE]: channelResponse[0].displayName || '',
+          },
+        });
+      }),
+      map((channelResponse) => {
+        return channelResponse;
+      })
+    );
 
   signInWithGoogle(): Observable<any> {
     return new Observable((subscriber) => {
@@ -154,90 +220,116 @@ export class SocialAccountService {
 
   signInWithTwitter() {
     this.conectionsLoadingSubject.next(true);
-    from(signInWithPopup(this.auth, this.twitterProvider)).pipe(
-      map((result) => {
-        const resultUser = result.user;
-        // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
-        // You can use these server side with your app's credentials to access the Twitter API.
-        const credential = TwitterAuthProvider.credentialFromResult(result);
-        if (credential !== null) {
-          const token = credential.accessToken;
-          const secret = credential.secret;
+    from(signInWithPopup(this.auth, this.twitterProvider))
+      .pipe(
+        map((result) => {
+          const resultUser = result.user;
+          // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
+          // You can use these server side with your app's credentials to access the Twitter API.
+          const credential = TwitterAuthProvider.credentialFromResult(result);
+          if (credential !== null) {
+            const token = credential.accessToken;
+            const secret = credential.secret;
 
-          this.firestoreRepo.updateCurrentUserDocument({
-            [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
-              [PostingPlatform.TWITTER]: resultUser?.displayName || '',
-            },
-          });
+            this.firestoreRepo.updateCurrentUserDocument({
+              [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
+                [PostingPlatform.TWITTER]: resultUser?.displayName || '',
+              },
+            });
 
-          const oAuth2Payload = {
-            [ACCESS_TOKEN]: token,
-            [REFRESH_TOKEN]: secret,
-            [SCOPES]: this.twitterScopes,
-            [LAST_LOGIN_AT]: resultUser.metadata.lastSignInTime,
-            [CREATION_TIME]: resultUser.metadata.creationTime,
-          };
+            const oAuth2Payload = {
+              [ACCESS_TOKEN]: token,
+              [REFRESH_TOKEN]: secret,
+              [SCOPES]: this.twitterScopes,
+              [LAST_LOGIN_AT]: resultUser.metadata.lastSignInTime,
+              [CREATION_TIME]: resultUser.metadata.creationTime,
+            };
 
-          this.firestoreRepo.updateCurrentUserCollectionDocument(
-            USER_OAUTH_2_KEYS_DOC,
-            PostingPlatform.TWITTER,
-            oAuth2Payload
-          );
-        } else {
+            this.firestoreRepo.updateCurrentUserCollectionDocument(
+              USER_OAUTH_2_KEYS_DOC,
+              PostingPlatform.TWITTER,
+              oAuth2Payload
+            );
+          } else {
+            console.log(
+              '🔥 ~ file: socialaccount.service.ts:126 ~ SocialAccountService ~ .then ~ oAuth2Payload:',
+              'credential error'
+            );
+            this.errorSubject.next('Twitter Auth Error');
+          }
+
+          // The signed-in user info.
+          const user = result.user;
           console.log(
-            '🔥 ~ file: socialaccount.service.ts:126 ~ SocialAccountService ~ .then ~ oAuth2Payload:',
-            'credential error'
+            '🚀 ~ file: socialaccount.service.ts:134 ~ SocialAccountService ~ .then ~ user:',
+            user
           );
-          this.errorSubject.next('Twitter Auth Error');
-        }
+          // IdP data available using getAdditionalUserInfo(result)
+          // ...
+        }),
+        concatMap((result) => {
+          const currentUser = this.fireAuthRepo.currentSessionUser;
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:205 ~ SocialAccountService ~ concatMap ~ currentUser:',
+            currentUser
+          );
+          if (currentUser === undefined) {
+            throw new Error('No current user');
+          }
+          return this.firestoreRepo.getUsersDocument(
+            USERS_COL,
+            currentUser?.uid
+          );
+        }),
+        concatMap((userDoc: any) => {
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:212 ~ SocialAccountService ~ concatMap ~ userDoc:',
+            userDoc
+          );
+          const constidToken = userDoc?.idToken;
+          // Build Firebase credential with the Google ID token.
+          const credential = GoogleAuthProvider.credential(constidToken);
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:216 ~ SocialAccountService ~ map ~ credential:',
+            credential
+          );
+          return signInWithCredential(this.auth, credential);
+        })
+      )
+      .subscribe({
+        next: (result) => {
+          this.conectionsLoadingSubject.next(false);
+        },
+        error: (error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:224 ~ SocialAccountService ~ signInWithTwitter ~ errorCode:',
+            errorCode
+          );
+          const errorMessage = error.message;
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:226 ~ SocialAccountService ~ signInWithTwitter ~ errorMessage:',
+            errorMessage
+          );
+          // The email of the user's account used.
+          const email = error.customData.email;
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:229 ~ SocialAccountService ~ signInWithTwitter ~ email:',
+            error.customData
+          );
+          // The AuthCredential type that was used.
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:211 ~ SocialAccountService ~ map ~ credential:',
+            credential
+          );
 
-        // The signed-in user info.
-        const user = result.user;
-        console.log(
-          '🚀 ~ file: socialaccount.service.ts:134 ~ SocialAccountService ~ .then ~ user:',
-          user
-        );
-        // IdP data available using getAdditionalUserInfo(result)
-        // ...
-      }),
-      concatMap((result) => {
-        const currentUser = this.fireAuthRepo.currentSessionUser;
-        console.log("🚀 ~ file: socialaccount.service.ts:205 ~ SocialAccountService ~ concatMap ~ currentUser:", currentUser)
-        if (currentUser === undefined) {
-          throw new Error('No current user');
-        }
-        return this.firestoreRepo.getUsersDocument(USERS_COL, currentUser?.uid)
-      }),
-      concatMap((userDoc: any) => {
-        console.log("🚀 ~ file: socialaccount.service.ts:212 ~ SocialAccountService ~ concatMap ~ userDoc:", userDoc)
-        const constidToken = userDoc?.idToken;
-        // Build Firebase credential with the Google ID token.
-        const credential = GoogleAuthProvider.credential(constidToken);
-        console.log("🚀 ~ file: socialaccount.service.ts:216 ~ SocialAccountService ~ map ~ credential:", credential)
-        return signInWithCredential(this.auth, credential)
-      })
-    ).subscribe({
-      next: (result) => {
-        this.conectionsLoadingSubject.next(false);
-      },
-      error: (error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        console.log("🚀 ~ file: socialaccount.service.ts:224 ~ SocialAccountService ~ signInWithTwitter ~ errorCode:", errorCode)
-        const errorMessage = error.message;
-        console.log("🚀 ~ file: socialaccount.service.ts:226 ~ SocialAccountService ~ signInWithTwitter ~ errorMessage:", errorMessage)
-        // The email of the user's account used.
-        const email = error.customData.email;
-        console.log("🚀 ~ file: socialaccount.service.ts:229 ~ SocialAccountService ~ signInWithTwitter ~ email:", error.customData)
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        console.log("🚀 ~ file: socialaccount.service.ts:211 ~ SocialAccountService ~ map ~ credential:", credential)
-
-        this.twitterAuthSubject.next(true);
-        this.conectionsLoadingSubject.next(false);
-        this.errorSubject.next(errorMessage);
-      }
-    })
+          this.twitterAuthSubject.next(true);
+          this.conectionsLoadingSubject.next(false);
+          this.errorSubject.next(errorMessage);
+        },
+      });
   }
 
   signInWithYoutube() {
