@@ -289,7 +289,7 @@ export class SocialAccountService {
       concatMap((accessTokenObj: { accessToken: string, expires_in: string }) => this.firestoreRepo.updateCurrentUserCollectionDocument(
         USER_OAUTH_2_KEYS_DOC,
         PostingPlatform.LINKEDIN,
-        accessTokenObj
+        { accessTokenObj }
       )
     )).subscribe({
       next: (result) => {

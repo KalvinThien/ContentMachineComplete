@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET } from 'appsecrets';
+import { LINKEDIN_CLIENT_ID } from 'appsecrets';
 import axios from 'axios';
 import { Observable, from, map } from 'rxjs';
 
@@ -10,9 +10,7 @@ export class LinkedinAuthRepository {
   private requestTokenUrl = 'https://www.linkedin.com/oauth/v2/authorization'; //?response_type=code&client_id=${your_client_id}&redirect_uri=${your_callback_url}&state=foobar&scope=r_liteprofile%20r_emailaddress%20w_member_social'
   // TODO: needs a prod mode redirectUri
   private redirectUri = 'http://localhost:4200/calendar';
-  private accessTokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
-
-  linkedinScopes = ['r_liteprofile', 'r_emailaddress', 'w_member_social'];
+  private linkedinScopes = ['r_liteprofile', 'r_emailaddress', 'w_member_social'];
 
   authCodeParams = {
     response_type: 'code',
@@ -38,7 +36,7 @@ export class LinkedinAuthRepository {
         if (response.data.message !== 'success') {
           throw new Error('Failed to exchange auth code for access token');
         }
-        return response.data;
+        return response.data.data;
       })
     );
   }

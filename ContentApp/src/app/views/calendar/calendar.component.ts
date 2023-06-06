@@ -25,9 +25,6 @@ export class CalendarComponent implements OnInit {
     this.linkedInToken = this.route.snapshot.queryParams["code"];
     if (this.linkedInToken !== undefined && this.linkedInToken !== '') {
       this.socialAccountService.getLinkedInAccessToken(this.linkedInToken);
-    } else {
-      // TODO handle error in the UI
-      console.log('🔥 error')
-    }
+    } 
   }
 }
