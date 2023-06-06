@@ -16,7 +16,7 @@
             </p-footer>
         </div>
         <div class="column">
-          <img src="assets/images/twitter_sample.png" alt="twitter" style="width: 20vw; height: 7vw; " />
+          <img src="assets/images/twitter_sample.png" alt="twitter" style="width: 20vw; height: 7vw;" />
         </div>
       </div>
     </p-tabPanel>
@@ -81,8 +81,22 @@
         <i class="pi pi-linkedin"></i>
         <span>LinkedIn</span>
       </ng-template>
-      <p>
-        Connect our app to your LinkedIn account and streamline your professional networking efforts. With automated posting, you can schedule and share valuable content with your connections, establishing thought leadership and boosting your professional brand. Experience the ease of automated LinkedIn posts!
-      </p>
+      <div class="container">
+        <div class="column" style="padding: 0.5rem;">
+          <p>
+            Connect our app to your LinkedIn account and streamline your professional networking efforts. With automated posting, you can schedule and share valuable content with your connections, establishing thought leadership and boosting your professional brand. Experience the ease of automated LinkedIn posts!
+          </p>
+            <p-footer>
+              <p-button label="Connect" icon="pi pi-plus" (click)="onLinkedinLogin()" [disabled]="linkedinConnected">
+                <p-progressSpinner *ngIf="isConnectionLoading" alt="loading" />
+              </p-button>
+            </p-footer>
+        </div>
+        <div class="column">
+          <p-card>
+            <img src="assets/images/linkedin_sample.png" alt="linkedin" style="width: 20vw; height: 15vw;" />
+          </p-card>
+        </div>
+      </div>
     </p-tabPanel>
   </p-tabView>

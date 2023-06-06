@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, catchError, of, map, concatMap, from, Subject } from 'rxjs';
-import { YOUTUBE_CLIENT_ID } from '../../../appsecrets';
+import { YOUTUBE_CLIENT_ID } from '../../../../appsecrets';
 import axios from 'axios';
 
 @Injectable({

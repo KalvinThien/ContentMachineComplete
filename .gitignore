@@ -132,3 +132,11 @@ ContentApp/package-lock.json
 ContentApp/.editorconfig
 ContentApp/.vscode/
 ContentApp/appsecrets.ts
+
+ContentBackbone/node_modules
+ContentBackbone/.firebase
+ContentBackbone/pnpm-lock.yaml
+ContentBackbone/package-lock.json
+ContentBackbone/appsecrets.js
+
+*.cache

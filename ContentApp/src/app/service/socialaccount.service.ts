@@ -19,6 +19,7 @@ import {
 } from 'rxjs';
 import {
   FirestoreRepository,
+  SCOPE,
   USERS_COL,
 } from '../repository/firebase/firestore.repo';
 import { firebase } from 'firebaseui-angular';
@@ -35,7 +36,8 @@ import {
   SCOPE as SCOPES,
 } from '../repository/firebase/firestore.repo';
 import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
-import { YoutubeAuthRepository } from '../repository/youtubeauth.repo';
+import { YoutubeAuthRepository } from '../repository/oauth/youtubeauth.repo';
+import { LinkedinAuthRepository } from '../repository/oauth/linkedinauth.repo';
 
 @Injectable({
   providedIn: 'root',
@@ -64,12 +66,12 @@ export class SocialAccountService {
     'tweet.delete',
     'follows.write',
   ];
-  private youtubeScopes = [];
 
   constructor(
     private fireAuthRepo: FireAuthRepository,
     private firestoreRepo: FirestoreRepository,
-    private youtubeAuthRepo: YoutubeAuthRepository
+    private youtubeAuthRepo: YoutubeAuthRepository,
+    private linkedinAuthRepo: LinkedinAuthRepository
   ) {
     this.facebookProvider.addScope('user_birthday');
     this.facebookProvider.setCustomParameters({
@@ -91,6 +93,7 @@ export class SocialAccountService {
       map((tokenResponse) => {
         const oAuth2Payload = {
           [ACCESS_TOKEN]: tokenResponse,
+          [SCOPES]: this.youtubeAuthRepo.youtubeScopes
         };
 
         this.firestoreRepo.updateCurrentUserCollectionDocument(
@@ -219,7 +222,7 @@ export class SocialAccountService {
             const oAuth2Payload = {
               [ACCESS_TOKEN]: token,
               [REFRESH_TOKEN]: secret,
-              [SCOPES]: this.twitterScopes,
+              [SCOPE]: this.twitterScopes,
               [LAST_LOGIN_AT]: resultUser.metadata.lastSignInTime,
               [CREATION_TIME]: resultUser.metadata.creationTime,
             };
@@ -279,7 +282,28 @@ export class SocialAccountService {
     this.youtubeAuthRepo.getRequestToken();
   }
 
-  signInWithLinkedin() {
-    // this.socialAuthService.signIn(LinkedinLoginProvider.PROVIDER_ID);
+  getLinkedInCredentials() { return this.linkedinAuthRepo.authCodeParams; }
+
+  getLinkedInAccessToken(authCode: string) {
+    this.linkedinAuthRepo.exchanceAuthCodeForAccessToken(authCode).pipe(
+      concatMap((accessTokenObj: { accessToken: string, expires_in: string }) => this.firestoreRepo.updateCurrentUserCollectionDocument(
+        USER_OAUTH_2_KEYS_DOC,
+        PostingPlatform.LINKEDIN,
+        accessTokenObj
+      )
+    )).subscribe({
+      next: (result) => {
+        if (result) {
+          this.linkedinAuthSubject.next(true);
+          console.log('🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result', result);
+        } else {
+          this.errorSubject.next('LinkedIn Auth Error');
+        }
+      },
+      error: (error) => {
+        console.log('🔥 ~ file: socialaccount.service.ts:235 ~ SocialAccountService ~ .subscribe ~ error', error);
+        this.errorSubject.next(error);
+      }
+    });
   }
 }

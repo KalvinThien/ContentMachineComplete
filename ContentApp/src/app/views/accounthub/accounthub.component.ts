@@ -12,6 +12,7 @@ export class AccounthubComponent implements OnInit {
   isConnectionLoading = false;
   twitterConnected = false;
   youtubeConnected = false;
+  linkedinConnected = false;
   
   constructor(
     private socialAuthService: SocialAccountService
@@ -48,6 +49,11 @@ export class AccounthubComponent implements OnInit {
     
     onYoutubeLogin() {
       this.socialAuthService.signInWithYoutube();
+    }
+
+    onLinkedinLogin() {
+      const linkedInCredentials = this.socialAuthService.getLinkedInCredentials();
+      window.location.href = `https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=${linkedInCredentials.client_id}&redirect_uri=${linkedInCredentials.redirect_uri}&scope=${linkedInCredentials.scope}`;
     }
 }
 
