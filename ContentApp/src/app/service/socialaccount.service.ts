@@ -98,28 +98,7 @@ export class SocialAccountService {
           PostingPlatform.YOUTUBE,
           oAuth2Payload
         );
-        console.log(
-          '🚀 ~ file: socialaccount.service.ts:74 ~ SocialAccountService ~ map ~ tokenResponse:',
-          tokenResponse
-        );
-        return tokenResponse;
-      }),
-      concatMap((tokenResponse) =>
-        this.youtubeAuthRepo.getChannels(tokenResponse)
-      ),
-      concatMap((channelResponse) => {
-        console.log(
-          '🚀 ~ file: socialaccount.service.ts:76 ~ SocialAccountService ~ channelResponse:',
-          channelResponse
-        );
-        return this.firestoreRepo.updateCurrentUserDocument({
-          [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
-            [PostingPlatform.YOUTUBE]: channelResponse[0].displayName || '',
-          },
-        });
-      }),
-      map((channelResponse) => {
-        return channelResponse;
+        return tokenResponse !== null;
       })
     );
 
@@ -251,28 +230,16 @@ export class SocialAccountService {
               oAuth2Payload
             );
           } else {
-            console.log(
-              '🔥 ~ file: socialaccount.service.ts:126 ~ SocialAccountService ~ .then ~ oAuth2Payload:',
-              'credential error'
-            );
             this.errorSubject.next('Twitter Auth Error');
           }
 
           // The signed-in user info.
           const user = result.user;
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:134 ~ SocialAccountService ~ .then ~ user:',
-            user
-          );
           // IdP data available using getAdditionalUserInfo(result)
           // ...
         }),
         concatMap((result) => {
           const currentUser = this.fireAuthRepo.currentSessionUser;
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:205 ~ SocialAccountService ~ concatMap ~ currentUser:',
-            currentUser
-          );
           if (currentUser === undefined) {
             throw new Error('No current user');
           }
@@ -282,17 +249,9 @@ export class SocialAccountService {
           );
         }),
         concatMap((userDoc: any) => {
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:212 ~ SocialAccountService ~ concatMap ~ userDoc:',
-            userDoc
-          );
           const constidToken = userDoc?.idToken;
           // Build Firebase credential with the Google ID token.
           const credential = GoogleAuthProvider.credential(constidToken);
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:216 ~ SocialAccountService ~ map ~ credential:',
-            credential
-          );
           return signInWithCredential(this.auth, credential);
         })
       )
@@ -303,27 +262,11 @@ export class SocialAccountService {
         error: (error) => {
           // Handle Errors here.
           const errorCode = error.code;
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:224 ~ SocialAccountService ~ signInWithTwitter ~ errorCode:',
-            errorCode
-          );
           const errorMessage = error.message;
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:226 ~ SocialAccountService ~ signInWithTwitter ~ errorMessage:',
-            errorMessage
-          );
           // The email of the user's account used.
           const email = error.customData.email;
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:229 ~ SocialAccountService ~ signInWithTwitter ~ email:',
-            error.customData
-          );
           // The AuthCredential type that was used.
           const credential = GoogleAuthProvider.credentialFromError(error);
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:211 ~ SocialAccountService ~ map ~ credential:',
-            credential
-          );
 
           this.twitterAuthSubject.next(true);
           this.conectionsLoadingSubject.next(false);
@@ -333,7 +276,7 @@ export class SocialAccountService {
   }
 
   signInWithYoutube() {
-    // this.socialAuthService.signIn(YoutubeLoginProvider.PROVIDER_ID);
+    this.youtubeAuthRepo.getRequestToken();
   }
 
   signInWithLinkedin() {

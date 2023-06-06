@@ -17,32 +17,31 @@ export class YoutubeAuthRepository {
   private tokenResponseSubject = new Subject<string>();
   tokenResponseObserver$ = this.tokenResponseSubject.asObservable();
 
+  youtubeScopes = [
+    'https://www.googleapis.com/auth/youtube.upload',
+    'https://www.googleapis.com/auth/youtube',
+    'https://www.googleapis.com/auth/youtube.readonly',
+  ]
+
   constructor() { this.initTokenClient(); }
 
   getRequestToken() { this.identityTokenClient.requestAccessToken(); }
 
   initTokenClient() {
-    console.log(
-      '🚀 ~ file: youtube.service.ts:24 ~ YoutubeService ~ initTokenClient ~ initTokenClient:'
-    );
     //@ts-ignore
     this.identityTokenClient = google.accounts.oauth2.initTokenClient({
         client_id: YOUTUBE_CLIENT_ID,
-      scope:
-        'https://www.googleapis.com/auth/youtube.readonly \
-        https://www.googleapis.com/auth/youtube',
+      scope: this.youtubeScopes.join(' \ '),
+        // 'https://www.googleapis.com/auth/youtube.readonly \
+        // https://www.googleapis.com/auth/youtube',
       ux_mode: 'popup',
       // @ts-ignore
       callback: (tokenResponse) => {
-        console.log(
-          '🚀 ~ file: auth.service.ts:49 ~ tokenClientInit ~ tokenResponse:',
-          tokenResponse
-        );
         this.tokenResponseSubject.next(tokenResponse.access_token);
       },
       error_callback: (error: any) => {
         console.log(
-          '🚀 ~ file: auth.service.ts:55 ~ AuthService ~ tokenClientInit ~ e:',
+          '🔥 ~ file: auth.service.ts:55 ~ AuthService ~ tokenClientInit ~ e:',
           error
         );
         return of(this.tokenResponseSubject.error(error));
@@ -50,6 +49,11 @@ export class YoutubeAuthRepository {
     });
   }
 
+  /**
+   * 
+   * @param accessToken Does not work at this point
+   * @returns 
+   */
   getChannels(accessToken: string): Observable<any> {
     const headers = { 'Authorization': `Bearer ${accessToken}` };
     return of(axios.get(`${this.BASE_URL}/channels?part=snippet&mine=true`, {

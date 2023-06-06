@@ -126,7 +126,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-ContentApp/.firebase/
+ContentApp/.firebase
 ContentApp/pnpm-lock.yaml
 ContentApp/package-lock.json
 ContentApp/.editorconfig

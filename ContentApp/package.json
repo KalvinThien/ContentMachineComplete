@@ -21,6 +21,7 @@
     "@angular/platform-browser-dynamic": "^16.0.0",
     "@angular/router": "^16.0.0",
     "angular-calendar": "^0.31.0",
+    "@types/gapi": "^0.0.44",
     "axios": "^1.4.0",
     "date-fns": "^2.29.3",
     "firebase": "^9.22.1",
