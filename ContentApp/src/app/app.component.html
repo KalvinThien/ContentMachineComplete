@@ -1,28 +1,89 @@
-<!-- The header of your application
-<header>
-  <h4>Welcome to the Money Printer</h4>
-</header> -->
-
 <!-- Navigation bar -->
-<nav>
-  <a class="button"
-     routerLink="/login"
-     routerLinkActive="activebutton"
-     ariaCurrentWhenActive="page">
-    Login
-  </a> | 
-  <a class="button"
-     routerLink="/dashboard"
-     routerLinkActive="activebutton"
-     ariaCurrentWhenActive="page">
-    Dashboard
+<p-menubar [model]="items">
+  <ng-template pTemplate="start">
+    <div class="horizontal-container">
+      <img src="https://primefaces.org/cdn/primeng/images/primeng.svg" height="40" class="mr-2" />
+      <h3>Content Calendar</h3>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="end">
+    <div class="horizontal-container">
+      <p-button icon="pi pi-calendar"
+        styleClass="p-button-rounded p-button-secondary p-button-text"
+        (click)="onCalendarClick()"></p-button>
+      <p-button icon="pi pi-user"
+        styleClass="p-button-rounded p-button-secondary p-button-text"
+        (click)="onAccountsClick()"></p-button>
+      <p-button icon="pi pi-power-off"
+        styleClass="p-button-rounded p-button-danger p-button-text"
+        (click)="onLogoutClick()"></p-button>
+    </div>
+  </ng-template>
+</p-menubar>
+
+<p-dialog header="Please Login To Your Socials" [(visible)]="accountsVisible" [modal]="true" [style]="{ width: '40vw' }" [draggable]="false" [resizable]="false">
+  <app-account-hub [parentFocusedConnection]="focusedAccount"></app-account-hub>
+</p-dialog>
+<!-- Begin Dashboard Code -->
+<!-- SIDEBAR -->
+<!-- <section id="sidebar" [ngClass]="status ? 'hide' : ''">
+  <a href="#" class="brand">
+    <i class='bx bxs-smile'></i>
+    <span class="text">Content Machine</span>
   </a>
-</nav>
+ This is where we put our content list of upcoming 
+  <ul class="side-menu top">
+    <li class="active">
+      <a href="#">
+        <i class='bx bxs-dashboard' ></i>
+        <span class="text">Calendar</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-doughnut-chart' ></i>
+        <span class="text">Analytics</span>
+      </a>
+    </li>
+    <li>
+  </ul>
+  <ul class="side-menu">
+    <li>
+      <a href="#">
+        <i class='bx bxs-cog' ></i>
+        <span class="text">Settings</span>
+      </a>
+    </li>
+    <li>
+      <a href="#" class="logout">
+        <i class='bx bxs-log-out-circle' ></i>
+        <span class="text">Logout</span>
+      </a>
+    </li>
+  </ul>
+</section>
 
-<!-- Main content where router will inject components -->
+<section id="content">
+  <nav>
+    <i (click)="addToggle()" class='bx bx-menu' ></i>
+    <a href="#" class="nav-link">Categories</a>
+    <form action="#">
+      <div class="form-input">
+        <input type="search" placeholder="Search...">
+        <button type="button" class="search-btn"><i class='bx bx-search' ></i></button>
+      </div>
+    </form>
+    <a href="#" class="notification">
+      <i class='bx bxs-bell' ></i>
+      <span class="num">8</span>
+    </a>
+    <a href="#" class="profile">
+      <img src="https://secure.gravatar.com/avatar/d09eaad01aea86c51b4f892b4f8abf6f?s=100&d=wavatar&r=g">
+    </a>
+  </nav> -->
+<!-- NAVBAR -->
+<!-- MAIN -->
 <router-outlet></router-outlet>
-
-<!-- Footer 
-<footer>
-  Footer
-</footer> -->
+<!-- MAIN -->
+<!-- </section> -->
+<!-- CONTENT -->

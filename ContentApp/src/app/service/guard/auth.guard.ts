@@ -7,7 +7,7 @@ import { FireAuthRepository } from '../../repository/firebase/fireauth.repo';
 import { map } from 'rxjs';
 
 export const authGuard = (next: ActivatedRouteSnapshot) => {
-  const sessionUserPresent = inject(FireAuthRepository).sessionUser !== undefined && inject(FireAuthRepository).sessionUser !== null;
+  const sessionUserPresent = inject(FireAuthRepository).currentSessionUser !== undefined && inject(FireAuthRepository).currentSessionUser !== null;
   if (sessionUserPresent) {
     console.log("🚀 ~ file: auth.guard.ts:12 ~ authGuard ~ sessionUserPresent:", sessionUserPresent)
     return true;

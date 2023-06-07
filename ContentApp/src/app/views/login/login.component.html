@@ -1,13 +1,28 @@
-<header style="text-align: right;">
-  <p (click)="goToHome()">HOME</p>
-</header>
 <div class="container">
-  <mat-card>
+  <p-card header="Login To Your Account" subheader="Let's get started automating your content" [style]="{ width: '360px' }">
+    <ng-template pTemplate="header">
+      <img alt="Card" src="https://primefaces.org/cdn/primeng/images/usercard.png" />
+    </ng-template>
+    <p>
+      Hey! My name is Maya.  I will be teaching you to the Machine and helping you along the way.
+      It won't be long before you all you need to do is press less than 5 buttons and you will have
+      your social media run by a team of hyper intelligent, sentient robots...kidding.
+    </p>
+    <p>
+      But seriously, I'm here to help.  Let's get started by logging in with your Google account.
+    </p>
+    <ng-template pTemplate="footer">
+      <p-button label="Login With Google" icon="pi pi-check" (click)="onSubmit()"></p-button>
+      <p-button label="Go To Main" icon="pi pi-times" styleClass="p-button-secondary"
+        [style]="{ 'margin-left': '.5em' }" (onClick)="goToHome()"></p-button>
+    </ng-template>
+  </p-card>
+  <!-- <mat-card>
     <mat-card-header>
       <mat-card-title>Login</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <button mat-raised-button color="primary" (click)="onSubmit()">Login</button>
     </mat-card-content>
-  </mat-card>
+  </mat-card> -->
 </div>

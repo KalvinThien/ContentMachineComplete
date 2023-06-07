@@ -1,22 +1,25 @@
 import { Injectable } from '@angular/core';
-import { NavigationService } from '../navigation.service';
+import { NavigationService } from './navigation.service';
 import { Observable, Subject, catchError, map, of } from 'rxjs';
-import { FirebaseUser } from '../../model/user/user.model';
-import { FireAuthRepository } from '../../repository/firebase/fireauth.repo';
+import { FirebaseUser } from '../model/user/user.model';
+import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
 import { User } from '@angular/fire/auth';
 import { FirestoreRepository, PURCHASED_USERS_COL, USERS_COL } from 'src/app/repository/firebase/firestore.repo';
 import { DocumentReference } from '@angular/fire/firestore';
+import { SocialAuthService } from './socialauth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SessionService {
+  
   private errorSubject = new Subject<string>();
 
   constructor(
     private fireAuthRepo: FireAuthRepository,
     private firestoreRepo: FirestoreRepository,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private socialAuthService: SocialAuthService
   ) {
     this.fireAuthRepo.getUserAuthObservable().subscribe((user) => {
       // will reinsert if needed later
@@ -25,8 +28,8 @@ export class SessionService {
   }
 
   checkForAuthLoginRedirect() {
-    if (this.fireAuthRepo.sessionUser !== null) {
-      this.navigationService.navigateToDashboard();
+    if (this.fireAuthRepo.currentSessionUser !== null) {
+      this.navigationService.navigateToCalendar();
       return;
     }
 
@@ -44,16 +47,32 @@ export class SessionService {
   }
 
   checkForAuthLogoutRedirect() {
-    if (this.fireAuthRepo.sessionUser === null) {
+    if (this.fireAuthRepo.currentSessionUser === null) {
       console.log(
         '🚀 ~ file: session.service.ts:35 ~ SessionService ~ this.fireAuthRepo.getUserAuthObservable ~ user:',
-        this.fireAuthRepo.sessionUser
+        this.fireAuthRepo.currentSessionUser
       );
       // this.navService.navigateToLander();
       return;
     } else {
       // this.navService.navigateToList();
     }
+  }
+
+  verifyEmailWithGoogle() {
+    this.socialAuthService.signInWithGoogle().subscribe({
+      next: (user) => {
+        if (user !== null) {
+          this.verifyEmail(user);
+        } else {
+          this.errorSubject.next('Google Auth Error');
+        }
+      },
+      error: (error) => {
+        console.log('🔥 ' + error);
+        this.errorSubject.next(error);
+      }
+    });
   }
 
   verifyPurchaseEmail(email: string): Observable<boolean> {
@@ -75,7 +94,7 @@ export class SessionService {
 
   getProfilePic(): string {
     return (
-      this.fireAuthRepo.sessionUser?.photoURL ?? 'https://placehold.co/48x48'
+      this.fireAuthRepo.currentSessionUser?.photoURL ?? 'https://placehold.co/48x48'
     );
   }
 
@@ -91,16 +110,12 @@ export class SessionService {
       this.verifyPurchaseEmail(email!!).subscribe({
         next: (userExists) => {
           if (userExists) {
-            console.log(
-              '🚀 ~ file: session.service.ts:104 ~ SessionService ~ this.fireAuthRepo.verifyPurchaseEmail ~ userExists:',
-              userExists
-            );
             this.setUserData({
-              ...authUser?.toJSON(),
+              ...authUser,
               // isVirgin: isFirstTimeUser,
             });
             //
-            this.navigationService.navigateToDashboard();
+            this.navigationService.navigateToCalendar();
             //
           } else {
             this.fireAuthRepo.signOut();
@@ -131,25 +146,28 @@ export class SessionService {
     //   `${USERS_COL}/${user.uid}`
     // );
     const userData = {
-      uid: user.uid,
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
-      // isVirgin: user.isVirgin,
+      lastLogin: user.reloadUserInfo.lastLoginAt,
+      creationTime: user.reloadUserInfo.createdAt,
+      lastRefreshAt: user.reloadUserInfo.lastRefreshAt,
+      idToken: user.google_credentials.idToken,
     };
 
     // Check if the user document exists
-    this.firestoreRepo.getUsersDocument<DocumentReference>(USERS_COL, user.uid).subscribe((doc: DocumentReference) => {
+    this.firestoreRepo.getUsersDocument(USERS_COL, user.uid).subscribe((doc) => {
       if (doc !== undefined) {
-        console.log("🚀 ~ file: session.service.ts:144 ~ SessionService ~ this.firestoreRepo.getUsersDocument<DocumentReference> ~ doc:", doc)
+        console.log("🚀 ~ Updating user")
         // User exists, update the existing user data
         // userData.isVirgin = false;
-        this.firestoreRepo.updateUsersDocument(USERS_COL, user.uid, userData);
+        this.firestoreRepo.updateCurrentUserDocument(userData);
       } else {
-        console.log("🚀 ~ file: session.service.ts:149 ~ SessionService ~ this.firestoreRepo.getUsersDocument<DocumentReference> ~ doc:", 'doc doesnt exist')
+        console.log("🚀 ~ Creating new user")
+        console.log(user)
         // User doesn't exist, create a new user document
-        this.firestoreRepo.createUsersDocument(USERS_COL, userData, user.uid);
+        this.firestoreRepo.createUserDocument(USERS_COL, userData, user.uid);
       }
     });
   }
