@@ -6,7 +6,7 @@ import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
 import { User } from '@angular/fire/auth';
 import { FirestoreRepository, PURCHASED_USERS_COL, USERS_COL } from 'src/app/repository/firebase/firestore.repo';
 import { DocumentReference } from '@angular/fire/firestore';
-import { SocialAccountService } from './socialaccount.service';
+import { SocialAuthService } from './socialauth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +19,7 @@ export class SessionService {
     private fireAuthRepo: FireAuthRepository,
     private firestoreRepo: FirestoreRepository,
     private navigationService: NavigationService,
-    private socialAccountService: SocialAccountService
+    private socialAuthService: SocialAuthService
   ) {
     this.fireAuthRepo.getUserAuthObservable().subscribe((user) => {
       // will reinsert if needed later
@@ -60,7 +60,7 @@ export class SessionService {
   }
 
   verifyEmailWithGoogle() {
-    this.socialAccountService.signInWithGoogle().subscribe({
+    this.socialAuthService.signInWithGoogle().subscribe({
       next: (user) => {
         if (user !== null) {
           this.verifyEmail(user);

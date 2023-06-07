@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
-  FacebookAuthProvider,
   getAuth,
   GoogleAuthProvider,
-  OAuthCredential,
   signInWithCredential,
   signInWithPopup,
   TwitterAuthProvider,
@@ -38,27 +36,27 @@ import {
 import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
 import { YoutubeAuthRepository } from '../repository/oauth/youtubeauth.repo';
 import { LinkedinAuthRepository } from '../repository/oauth/linkedinauth.repo';
+import { FacebookAuthRepository } from '../repository/oauth/facebookauth.repo';
+import { NavigationService } from './navigation.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SocialAccountService {
+export class SocialAuthService {
   private auth = getAuth();
 
   private googleProvider = new GoogleAuthProvider();
-  private facebookProvider = new FacebookAuthProvider();
   private twitterProvider = new TwitterAuthProvider();
 
-  private facebookAuthSubject = new Subject<boolean>();
   private mediumAuthSubject = new Subject<boolean>();
   private twitterAuthSubject = new Subject<boolean>();
+  private facebookAuthSubject = new Subject<boolean>();
   private linkedinAuthSubject = new Subject<boolean>();
 
   private conectionsLoadingSubject = new Subject<boolean>();
   private errorSubject = new Subject<string>();
 
   private googleScopes = [];
-  private facebookScopes = [];
   private mediumScopes = [];
   private twitterScopes = [
     'tweet.read',
@@ -68,20 +66,17 @@ export class SocialAccountService {
   ];
 
   constructor(
+    private navigationService: NavigationService,
     private fireAuthRepo: FireAuthRepository,
     private firestoreRepo: FirestoreRepository,
     private youtubeAuthRepo: YoutubeAuthRepository,
-    private linkedinAuthRepo: LinkedinAuthRepository
-  ) {
-    this.facebookProvider.addScope('user_birthday');
-    this.facebookProvider.setCustomParameters({
-      display: 'popup',
-    });
-  }
+    private linkedinAuthRepo: LinkedinAuthRepository,
+    private facebookAuthRepo: FacebookAuthRepository
+  ) {  /** */ }
 
-  getFacebookAuthObservable$ = this.facebookAuthSubject.asObservable();
   getMediumAuthObservable$ = this.mediumAuthSubject.asObservable();
   getTwitterAuthObservable$ = this.twitterAuthSubject.asObservable();
+  getFacebookAuthObservable$ = this.facebookAuthSubject.asObservable();
   getLinkedinAuthObservable$ = this.linkedinAuthSubject.asObservable();
 
   getConnectionLoadingObservable$ =
@@ -141,59 +136,29 @@ export class SocialAccountService {
   /**
    * This is not working except in HTTPS published
    */
-  signInWithFacebook() {
-    signInWithPopup(this.auth, this.facebookProvider)
-      .then((result) => {
-        // The signed-in user info.
-        const user = result.user;
-        console.log(
-          '🚀 ~ file: socialaccount.service.ts:39 ~ SocialAccountService ~ .then ~ user:',
-          user
-        );
-
-        // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-        const credential = FacebookAuthProvider.credentialFromResult(result);
-
-        if (credential !== null) {
-          const accessToken = credential.accessToken;
-          console.log(
-            '🚀 ~ file: socialaccount.service.ts:48 ~ SocialAccountService ~ .then ~ accessToken:',
-            accessToken
-          );
-
-          // If we have credentials we will sign in explicityly to Facebook so we can get a long-lived token
-          // If you need to continuously use the Facebook API, use option 2 as Firebase does not manage OAuth
-          //tokens after they expire. If you just need Facebook data on sign-in, then use option 1.
-          firebase
-            .auth()
-            .signInWithCredential(credential)
-            .then((userCredential) => {
-              console.log(
-                '🚀 ~ file: socialaccount.service.ts:51 ~ SocialAccountService ~ firebase.auth ~ userCredential:',
-                userCredential
-              );
-            })
-            .catch((error) => {
-              console.log(
-                '🚀 ~ file: socialaccount.service.ts:53 ~ SocialAccountService ~ firebase.auth ~ error:',
-                error
-              );
-            });
+  signInWithFacebook(authCode: string) {
+    this.facebookAuthRepo.exchangeAuthCodeForAccessToken(authCode).pipe(
+      concatMap((accessTokenObj: any) => this.firestoreRepo.updateCurrentUserCollectionDocument(
+        USER_OAUTH_2_KEYS_DOC,
+        PostingPlatform.FACEBOOK,
+        accessTokenObj
+      )
+    )).subscribe({
+      next: (result) => {
+        if (result) {
+          this.navigationService.navigateToRoot();
+          this.facebookAuthSubject.next(true);
+          console.log('🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result', result);
+        } else {
+          this.errorSubject.next('LinkedIn Auth Error');
         }
-
-        // IdP data available using getAdditionalUserInfo(result)
-        // ...
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = FacebookAuthProvider.credentialFromError(error);
-        // ...
-      });
+      },
+      error: (error) => {
+        this.navigationService.navigateToRoot();
+        this.errorSubject.next(error);
+        console.log('🔥 ~ file: socialaccount.service.ts:156 ~ SocialAccountService ~ .subscribe ~ error', error);
+      }
+    });
   }
 
   signInWithMedium() {
@@ -286,23 +251,27 @@ export class SocialAccountService {
 
   getLinkedInAccessToken(authCode: string) {
     this.linkedinAuthRepo.exchanceAuthCodeForAccessToken(authCode).pipe(
-      concatMap((accessTokenObj: { accessToken: string, expires_in: string }) => this.firestoreRepo.updateCurrentUserCollectionDocument(
-        USER_OAUTH_2_KEYS_DOC,
-        PostingPlatform.LINKEDIN,
-        { accessTokenObj }
-      )
+      concatMap((accessTokenObj: { message: string, data: any }) => {
+        console.log("🚀 ~ file: socialauth.service.ts:255 ~ SocialAuthService ~ concatMap ~ accessTokenObj:", accessTokenObj)
+        return this.firestoreRepo.updateCurrentUserCollectionDocument(
+          USER_OAUTH_2_KEYS_DOC,
+          PostingPlatform.LINKEDIN,
+          accessTokenObj 
+      )}
     )).subscribe({
       next: (result) => {
+        console.log('🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result', result);
         if (result) {
           this.linkedinAuthSubject.next(true);
-          console.log('🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result', result);
         } else {
           this.errorSubject.next('LinkedIn Auth Error');
         }
+        this.navigationService.navigateToRoot();
       },
       error: (error) => {
-        console.log('🔥 ~ file: socialaccount.service.ts:235 ~ SocialAccountService ~ .subscribe ~ error', error);
+        this.navigationService.navigateToRoot();
         this.errorSubject.next(error);
+        console.log('🔥 ~ file: socialaccount.service.ts:235 ~ SocialAccountService ~ .subscribe ~ error', error);
       }
     });
   }

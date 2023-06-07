@@ -26,6 +26,8 @@ import { DividerModule } from 'primeng/divider';
 import { TabViewModule } from 'primeng/tabview';
 import { AccounthubComponent } from './views/accounthub/accounthub.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { LinkedinRedirectComponent } from './views/redirects/linkedinredirect.component';
+import { FacebookRedirectComponent } from './views/redirects/facebookredirect.component';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -52,7 +54,9 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     CalendarComponent,
     PageNotFoundComponent,
     HomeComponent,
-    AccounthubComponent
+    AccounthubComponent,
+    LinkedinRedirectComponent,
+    FacebookRedirectComponent
   ],
   imports: [
     ProgressSpinnerModule,

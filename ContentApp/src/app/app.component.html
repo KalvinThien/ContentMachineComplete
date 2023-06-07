@@ -22,7 +22,7 @@
 </p-menubar>
 
 <p-dialog header="Please Login To Your Socials" [(visible)]="accountsVisible" [modal]="true" [style]="{ width: '40vw' }" [draggable]="false" [resizable]="false">
-  <app-account-hub></app-account-hub>
+  <app-account-hub [parentFocusedConnection]="focusedAccount"></app-account-hub>
 </p-dialog>
 <!-- Begin Dashboard Code -->
 <!-- SIDEBAR -->

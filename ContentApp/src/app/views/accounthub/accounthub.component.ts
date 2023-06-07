@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { SocialAccountService } from 'src/app/service/socialaccount.service';
-
+import { SocialAuthService } from '../../service/socialauth.service';
 
 @Component({
   selector: 'app-account-hub',
@@ -8,6 +7,8 @@ import { SocialAccountService } from 'src/app/service/socialaccount.service';
   styleUrls: ['./accounthub.component.css']
 })
 export class AccounthubComponent implements OnInit {
+
+  @Input() parentFocusedConnection = 0
   
   isConnectionLoading = false;
   twitterConnected = false;
@@ -15,9 +16,8 @@ export class AccounthubComponent implements OnInit {
   linkedinConnected = false;
   
   constructor(
-    private socialAuthService: SocialAccountService
-    ) { /** */ }
-    
+    private socialAuthService: SocialAuthService
+  ) { /** */ }
     
     ngOnInit(): void {
       this.socialAuthService.getYoutubeAuthObservable$.subscribe({
@@ -40,7 +40,14 @@ export class AccounthubComponent implements OnInit {
     }
     
     onFacebookLogin() {
-      this.socialAuthService.signInWithFacebook();
+      // this.socialAuthService.signInWithFacebook();
+      const params = {
+        client_id: '883874189493049',
+        redirect_uri: 'http://localhost:4200/facebook-callback',
+        facebookScope: 'email',
+      };
+    
+      window.location.href = `https://www.facebook.com/v15.0/dialog/oauth?client_id=${params.client_id}&redirect_uri=${params.redirect_uri}&scope=${params.facebookScope}`;
     }
     
     onTwitterLogin() {

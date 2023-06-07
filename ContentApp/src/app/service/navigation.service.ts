@@ -18,6 +18,10 @@ export class NavigationService {
     this.router.navigate(['calendar']);
   }
 
+  navigateToRoot() {
+    this.router.navigate(['']);
+  }
+
   navigateToLogin() {
     this.fireAuthRepo.signOut().then(() => {
       this.router.navigate(['login']);
