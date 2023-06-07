@@ -28,6 +28,7 @@ import { AccounthubComponent } from './views/accounthub/accounthub.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LinkedinRedirectComponent } from './views/redirects/linkedinredirect.component';
 import { FacebookRedirectComponent } from './views/redirects/facebookredirect.component';
+import { InputTextModule } from 'primeng/inputtext';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -59,6 +60,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     FacebookRedirectComponent
   ],
   imports: [
+    InputTextModule,
     ProgressSpinnerModule,
     TabViewModule,
     DividerModule,

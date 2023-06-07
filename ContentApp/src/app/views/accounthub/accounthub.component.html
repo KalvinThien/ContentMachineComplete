@@ -54,6 +54,19 @@
       posting, you can effortlessly schedule and share your content, reaching a wider audience with ease. Let us handle
       the logistics while you focus on crafting captivating stories!
     </p>
+    <ul>
+      <li>
+        The first step is to login to your Medium account.  Once there you will need to go to your SETTINGS then your SECURITY AND APPS tab.
+      </li>
+      <li>
+        Once there you will need to enter text and click on the GET TOKEN button.
+      </li>
+      <li>
+        Then just copy the token and paste it into the field below.
+      </li>
+    </ul>
+    <input pInputText style="width: 100%;" type="text" class="p-inputtext-lg" placeholder="Settings > Security and apps > Integration Token" [(ngModel)]="mediumIntegKey" />
+    <p-button label="Submit" (click)="onMediumSubmit()"></p-button>
   </p-tabPanel>
   <p-tabPanel header="youtube">
     <ng-template pTemplate="header">

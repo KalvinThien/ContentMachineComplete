@@ -15,6 +15,8 @@ export class AccounthubComponent implements OnInit {
   youtubeConnected = false;
   linkedinConnected = false;
   
+  mediumIntegKey: string = '';
+  
   constructor(
     private socialAuthService: SocialAuthService
   ) { /** */ }
@@ -61,6 +63,10 @@ export class AccounthubComponent implements OnInit {
     onLinkedinLogin() {
       const linkedInCredentials = this.socialAuthService.getLinkedInCredentials();
       window.location.href = `https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=${linkedInCredentials.client_id}&redirect_uri=${linkedInCredentials.redirect_uri}&scope=${linkedInCredentials.scope}`;
+    }
+
+    onMediumSubmit() {
+      this.socialAuthService.signInWithMedium(this.mediumIntegKey);
     }
 }
 

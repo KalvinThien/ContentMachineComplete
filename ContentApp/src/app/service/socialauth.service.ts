@@ -161,8 +161,25 @@ export class SocialAuthService {
     });
   }
 
-  signInWithMedium() {
-    // this.socialAuthService.signIn(MediumLoginProvider.PROVIDER_ID);
+  signInWithMedium(mediumAccessToken: string) {
+    from(this.firestoreRepo.updateCurrentUserCollectionDocument(
+      USER_OAUTH_2_KEYS_DOC,
+      PostingPlatform.MEDIUM,
+      {
+        [ACCESS_TOKEN]: mediumAccessToken,
+      }
+    )).subscribe({
+      next: (result) => {
+        if (result) {
+          this.mediumAuthSubject.next(true);
+        } else {
+          this.errorSubject.next('Medium Auth Error');
+        }
+      },
+      error: (error) => {
+        this.errorSubject.next(error);
+      }
+    });
   }
 
   signInWithTwitter() {
