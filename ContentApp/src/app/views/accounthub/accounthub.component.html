@@ -1,7 +1,21 @@
-<p-tabView styleClass="tabview-custom" [(activeIndex)]="parentFocusedConnection">
-  <p-tabPanel header="twitter">
+<div>
+  <p-progressSpinner 
+    *ngIf="isAccountsLoading"
+    class="col flex align-items-center justify-content-center"
+    styleClass="w-4rem h-4rem" 
+    strokeWidth="4" 
+    fill="var(--surface-ground)" 
+    animationDuration=".5s">
+  </p-progressSpinner>
+</div>
+<p-tabView 
+  *ngIf="!isAccountsLoading"
+  styleClass="tabview-custom" 
+  [(activeIndex)]="parentFocusedConnection">
+  <p-tabPanel header="twitter" [disabled]="twitterConnected">
     <ng-template pTemplate="header">
-      <i class="pi pi-twitter"></i>
+      <i class="pi pi-twitter" *ngIf="!twitterConnected"></i>
+      <i class="pi pi-check" *ngIf="twitterConnected"></i>
       <span>Twitter</span>
     </ng-template>
     <div class="container">
@@ -13,7 +27,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onTwitterLogin()" [disabled]="twitterConnected">
-            <p-progressSpinner *ngIf="isConnectionLoading" alt="loading" />
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem" />
           </p-button>
         </p-footer>
       </div>
@@ -22,9 +36,10 @@
       </div>
     </div>
   </p-tabPanel>
-  <p-tabPanel header="facebook">
+  <p-tabPanel header="facebook" [disabled]="facebookConnected">
     <ng-template pTemplate="header">
-      <i class="pi pi-facebook"></i>
+      <i class="pi pi-facebook" *ngIf="!facebookConnected"></i>
+      <i class="pi pi-check" *ngIf="facebookConnected"></i>
       <span>Facebook</span>
     </ng-template>
     <div class="container">
@@ -36,7 +51,8 @@
         </p>
         <p-footer>
           <button pButton type="button" label="Connect" icon="pi pi-plus" styleClass="p-button-success"
-            (click)="onFacebookLogin()"></button>
+          [disabled]="facebookConnected" (click)="onFacebookLogin()">
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem" /></button>
         </p-footer>
       </div>
       <div class="column">
@@ -44,9 +60,10 @@
       </div>
     </div>
   </p-tabPanel>
-  <p-tabPanel header="medium">
+  <p-tabPanel header="medium" [disabled]="mediumConnected">
     <ng-template pTemplate="header">
-      <i class="pi pi-pencil"></i>
+      <i class="pi pi-pencil" *ngIf="!mediumConnected"></i>
+      <i class="pi pi-check" *ngIf="mediumConnected"></i>
       <span>Medium</span>
     </ng-template>
     <p>
@@ -66,11 +83,14 @@
       </li>
     </ul>
     <input pInputText style="width: 100%;" type="text" class="p-inputtext-lg" placeholder="Settings > Security and apps > Integration Token" [(ngModel)]="mediumIntegKey" />
-    <p-button label="Submit" (click)="onMediumSubmit()"></p-button>
+    <p-button label="Submit" (click)="onMediumSubmit()" [disabled]="mediumConnected">
+      <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem" />
+    </p-button>
   </p-tabPanel>
-  <p-tabPanel header="youtube">
+  <p-tabPanel header="youtube" [disabled]="youtubeConnected">
     <ng-template pTemplate="header">
-      <i class="pi pi-youtube"></i>
+      <i class="pi pi-youtube" *ngIf="!youtubeConnected"></i>
+      <i class="pi pi-check" *ngIf="youtubeConnected"></i>
       <span>Youtube</span>
     </ng-template>
     <div class="container">
@@ -82,7 +102,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onYoutubeLogin()" [disabled]="youtubeConnected">
-            <p-progressSpinner *ngIf="isConnectionLoading" alt="loading" />
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem"/>
           </p-button>
         </p-footer>
       </div>
@@ -93,9 +113,10 @@
       </div>
     </div>
   </p-tabPanel>
-  <p-tabPanel header="LinkedIn">
+  <p-tabPanel header="LinkedIn" [disabled]="linkedinConnected" [disabled]="linkedinConnected">
     <ng-template pTemplate="header">
-      <i class="pi pi-linkedin"></i>
+      <i class="pi pi-linkedin" *ngIf="!linkedinConnected"></i>
+      <i class="pi pi-check" *ngIf="linkedinConnected"></i>
       <span>LinkedIn</span>
     </ng-template>
     <div class="container">
@@ -107,7 +128,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onLinkedinLogin()" [disabled]="linkedinConnected">
-            <p-progressSpinner *ngIf="isConnectionLoading" alt="loading" />
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem"/>
           </p-button>
         </p-footer>
       </div>
