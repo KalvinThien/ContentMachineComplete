@@ -17,13 +17,13 @@ import {
 } from 'rxjs';
 import {
   FirestoreRepository,
+  HANDLE,
   SCOPE,
   USERS_COL,
 } from '../repository/firebase/firestore.repo';
 import { firebase } from 'firebaseui-angular';
 import {
-  USER_SOCIAL_MEDIA_HANDLES_DOC,
-  USER_OAUTH_2_KEYS_DOC,
+  PERSONAL_ACCTS_DOC,
   PostingPlatform,
 } from '../repository/firebase/firestore.repo';
 import {
@@ -92,7 +92,7 @@ export class SocialAuthService {
         };
 
         this.firestoreRepo.updateCurrentUserCollectionDocument(
-          USER_OAUTH_2_KEYS_DOC,
+          PERSONAL_ACCTS_DOC,
           PostingPlatform.YOUTUBE,
           oAuth2Payload
         );
@@ -139,7 +139,7 @@ export class SocialAuthService {
   signInWithFacebook(authCode: string) {
     this.facebookAuthRepo.exchangeAuthCodeForAccessToken(authCode).pipe(
       concatMap((accessTokenObj: any) => this.firestoreRepo.updateCurrentUserCollectionDocument(
-        USER_OAUTH_2_KEYS_DOC,
+        PERSONAL_ACCTS_DOC,
         PostingPlatform.FACEBOOK,
         accessTokenObj
       )
@@ -163,7 +163,7 @@ export class SocialAuthService {
 
   signInWithMedium(mediumAccessToken: string) {
     from(this.firestoreRepo.updateCurrentUserCollectionDocument(
-      USER_OAUTH_2_KEYS_DOC,
+      PERSONAL_ACCTS_DOC,
       PostingPlatform.MEDIUM,
       {
         [ACCESS_TOKEN]: mediumAccessToken,
@@ -195,13 +195,8 @@ export class SocialAuthService {
             const token = credential.accessToken;
             const secret = credential.secret;
 
-            this.firestoreRepo.updateCurrentUserDocument({
-              [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
-                [PostingPlatform.TWITTER]: resultUser?.displayName || '',
-              },
-            });
-
             const oAuth2Payload = {
+              [HANDLE]: resultUser?.displayName || 'error',
               [ACCESS_TOKEN]: token,
               [REFRESH_TOKEN]: secret,
               [SCOPE]: this.twitterScopes,
@@ -210,7 +205,7 @@ export class SocialAuthService {
             };
 
             this.firestoreRepo.updateCurrentUserCollectionDocument(
-              USER_OAUTH_2_KEYS_DOC,
+              PERSONAL_ACCTS_DOC,
               PostingPlatform.TWITTER,
               oAuth2Payload
             );
@@ -271,7 +266,7 @@ export class SocialAuthService {
       concatMap((accessTokenObj: { message: string, data: any }) => {
         console.log("🚀 ~ file: socialauth.service.ts:255 ~ SocialAuthService ~ concatMap ~ accessTokenObj:", accessTokenObj)
         return this.firestoreRepo.updateCurrentUserCollectionDocument(
-          USER_OAUTH_2_KEYS_DOC,
+          PERSONAL_ACCTS_DOC,
           PostingPlatform.LINKEDIN,
           accessTokenObj 
       )}

@@ -1,0 +1,17 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.col-6 {
+  flex-basis: calc(75%);
+  max-width: calc(75%);
+}
+
+.col-4 {
+  flex-basis: calc(25%);
+  max-width: calc(25%);
+  
+  background-color: white;
+  flex-grow: 1;
+}

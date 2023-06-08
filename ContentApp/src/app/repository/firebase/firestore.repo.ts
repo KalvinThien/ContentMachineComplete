@@ -11,8 +11,7 @@ import { Observable, from, of } from 'rxjs';
 export const PURCHASED_USERS_COL = 'purchased_users';
 
 export const USERS_COL = 'users';
-export const USER_SOCIAL_MEDIA_HANDLES_DOC = 'social_media_handles';
-export const USER_OAUTH_2_KEYS_DOC = 'oAuth2Keys';
+export const PERSONAL_ACCTS_DOC = 'personal_accounts';
 
 export const PostingPlatform = {
   FACEBOOK: 'facebook',
@@ -27,6 +26,7 @@ export const PostingPlatform = {
 /**
  * Accounts and Oauth 2.0
  */
+export const HANDLE = 'handle';
 export const ACCESS_TOKEN = 'access_token';
 export const LAST_LOGIN_AT = 'last_login_at';
 export const CREATION_TIME = 'creation_time';
