@@ -13,10 +13,7 @@ export class NavigationService {
   ) {
     /** */
   }
-  
-  navigateToCalendar() {
-    this.router.navigate(['calendar']);
-  }
+
 
   navigateToRoot() {
     this.router.navigate(['']);

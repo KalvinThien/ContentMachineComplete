@@ -15,3 +15,8 @@
   background-color: white;
   flex-grow: 1;
 }
+
+.split-card {
+  padding: 1rem;
+  width: 33%;
+}

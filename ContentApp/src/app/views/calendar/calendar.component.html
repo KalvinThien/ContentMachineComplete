@@ -4,7 +4,7 @@
       <p-button 
         label="Create" 
         icon="pi pi-plus" 
-        styleClass="p-button-rounded p-button-text p-button-raised" 
+        styleClass="p-button-rounded p-button-raised" 
         [style]="{ width: '100%', display: 'flex', }"
         (click)="onCreateClick()"></p-button>
   </p-scrollPanel>
@@ -14,4 +14,7 @@
     </mwl-calendar-month-view>
   </div>
 </div>
-
+<!-- content creation from source -->
+<p-dialog header="Header" [(visible)]="showContentModal" [modal]="true" [style]="{ width: '75vw' }" [draggable]="false" [resizable]="false">
+  <app-createcontent></app-createcontent>
+</p-dialog>

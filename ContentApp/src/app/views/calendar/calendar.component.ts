@@ -11,6 +11,7 @@ export class CalendarComponent implements OnInit {
 
   viewDate: Date = new Date();
   events: CalendarEvent[] = [ /** */ ];
+  showContentModal = false;
 
   constructor(
     private contentService: ContentService
@@ -21,6 +22,6 @@ export class CalendarComponent implements OnInit {
   }
 
   onCreateClick(): void {
-    this.contentService.createEvent();
+    this.showContentModal = true;
   }
 }
