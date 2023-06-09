@@ -17,13 +17,14 @@ import {
 } from 'rxjs';
 import {
   FirestoreRepository,
+  HANDLE,
+  PLATFORM,
   SCOPE,
   USERS_COL,
 } from '../repository/firebase/firestore.repo';
 import { firebase } from 'firebaseui-angular';
 import {
-  USER_SOCIAL_MEDIA_HANDLES_DOC,
-  USER_OAUTH_2_KEYS_DOC,
+  PERSONAL_ACCTS_DOC,
   PostingPlatform,
 } from '../repository/firebase/firestore.repo';
 import {
@@ -38,6 +39,7 @@ import { YoutubeAuthRepository } from '../repository/oauth/youtubeauth.repo';
 import { LinkedinAuthRepository } from '../repository/oauth/linkedinauth.repo';
 import { FacebookAuthRepository } from '../repository/oauth/facebookauth.repo';
 import { NavigationService } from './navigation.service';
+import { SocialAccount } from '../model/socialaccount.model';
 
 @Injectable({
   providedIn: 'root',
@@ -47,6 +49,8 @@ export class SocialAuthService {
 
   private googleProvider = new GoogleAuthProvider();
   private twitterProvider = new TwitterAuthProvider();
+
+  private userPersonalAccounts = new Subject<SocialAccount[]>();
 
   private mediumAuthSubject = new Subject<boolean>();
   private twitterAuthSubject = new Subject<boolean>();
@@ -72,7 +76,11 @@ export class SocialAuthService {
     private youtubeAuthRepo: YoutubeAuthRepository,
     private linkedinAuthRepo: LinkedinAuthRepository,
     private facebookAuthRepo: FacebookAuthRepository
-  ) {  /** */ }
+  ) {
+    /** */
+  }
+
+  getPersonalAccountsObservable$ = this.userPersonalAccounts.asObservable();
 
   getMediumAuthObservable$ = this.mediumAuthSubject.asObservable();
   getTwitterAuthObservable$ = this.twitterAuthSubject.asObservable();
@@ -87,18 +95,34 @@ export class SocialAuthService {
     this.youtubeAuthRepo.tokenResponseObserver$.pipe(
       map((tokenResponse) => {
         const oAuth2Payload = {
+          [PLATFORM]: PostingPlatform.YOUTUBE,
           [ACCESS_TOKEN]: tokenResponse,
-          [SCOPES]: this.youtubeAuthRepo.youtubeScopes
+          [SCOPES]: this.youtubeAuthRepo.youtubeScopes,
         };
 
         this.firestoreRepo.updateCurrentUserCollectionDocument(
-          USER_OAUTH_2_KEYS_DOC,
+          PERSONAL_ACCTS_DOC,
           PostingPlatform.YOUTUBE,
           oAuth2Payload
         );
+
+        this.conectionsLoadingSubject.next(false);
         return tokenResponse !== null;
       })
     );
+
+  getPersonalAccounts() {
+    this.firestoreRepo
+      .getUserCollection<SocialAccount>(PERSONAL_ACCTS_DOC)
+      .subscribe({
+        next: (personalAccounts) => {
+          this.userPersonalAccounts.next(personalAccounts);
+        },
+        error: (error) => {
+          this.errorSubject.next(error);
+        }
+      });
+  }
 
   signInWithGoogle(): Observable<any> {
     return new Observable((subscriber) => {
@@ -137,38 +161,55 @@ export class SocialAuthService {
    * This is not working except in HTTPS published
    */
   signInWithFacebook(authCode: string) {
-    this.facebookAuthRepo.exchangeAuthCodeForAccessToken(authCode).pipe(
-      concatMap((accessTokenObj: any) => this.firestoreRepo.updateCurrentUserCollectionDocument(
-        USER_OAUTH_2_KEYS_DOC,
-        PostingPlatform.FACEBOOK,
-        accessTokenObj
+    this.facebookAuthRepo
+      .exchangeAuthCodeForAccessToken(authCode)
+      .pipe(
+        concatMap((accessTokenObj: any) =>
+          this.firestoreRepo.updateCurrentUserCollectionDocument(
+            PERSONAL_ACCTS_DOC,
+            PostingPlatform.FACEBOOK,
+            {
+              [PLATFORM]: PostingPlatform.FACEBOOK,
+              ...accessTokenObj
+            }
+          )
+        )
       )
-    )).subscribe({
-      next: (result) => {
-        if (result) {
+      .subscribe({
+        next: (result) => {
+          if (result) {
+            this.navigationService.navigateToRoot();
+            this.facebookAuthSubject.next(true);
+            console.log(
+              '🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result',
+              result
+            );
+          } else {
+            this.errorSubject.next('LinkedIn Auth Error');
+          }
+        },
+        error: (error) => {
           this.navigationService.navigateToRoot();
-          this.facebookAuthSubject.next(true);
-          console.log('🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result', result);
-        } else {
-          this.errorSubject.next('LinkedIn Auth Error');
-        }
-      },
-      error: (error) => {
-        this.navigationService.navigateToRoot();
-        this.errorSubject.next(error);
-        console.log('🔥 ~ file: socialaccount.service.ts:156 ~ SocialAccountService ~ .subscribe ~ error', error);
-      }
-    });
+          this.errorSubject.next(error);
+          console.log(
+            '🔥 ~ file: socialaccount.service.ts:156 ~ SocialAccountService ~ .subscribe ~ error',
+            error
+          );
+        },
+      });
   }
 
   signInWithMedium(mediumAccessToken: string) {
-    from(this.firestoreRepo.updateCurrentUserCollectionDocument(
-      USER_OAUTH_2_KEYS_DOC,
-      PostingPlatform.MEDIUM,
-      {
-        [ACCESS_TOKEN]: mediumAccessToken,
-      }
-    )).subscribe({
+    from(
+      this.firestoreRepo.updateCurrentUserCollectionDocument(
+        PERSONAL_ACCTS_DOC,
+        PostingPlatform.MEDIUM,
+        {
+          [PLATFORM]: PostingPlatform.MEDIUM,
+          [ACCESS_TOKEN]: mediumAccessToken,
+        }
+      )
+    ).subscribe({
       next: (result) => {
         if (result) {
           this.mediumAuthSubject.next(true);
@@ -178,7 +219,7 @@ export class SocialAuthService {
       },
       error: (error) => {
         this.errorSubject.next(error);
-      }
+      },
     });
   }
 
@@ -195,13 +236,9 @@ export class SocialAuthService {
             const token = credential.accessToken;
             const secret = credential.secret;
 
-            this.firestoreRepo.updateCurrentUserDocument({
-              [USER_SOCIAL_MEDIA_HANDLES_DOC]: {
-                [PostingPlatform.TWITTER]: resultUser?.displayName || '',
-              },
-            });
-
             const oAuth2Payload = {
+              [PLATFORM]: PostingPlatform.TWITTER,
+              [HANDLE]: resultUser?.displayName || 'error',
               [ACCESS_TOKEN]: token,
               [REFRESH_TOKEN]: secret,
               [SCOPE]: this.twitterScopes,
@@ -210,7 +247,7 @@ export class SocialAuthService {
             };
 
             this.firestoreRepo.updateCurrentUserCollectionDocument(
-              USER_OAUTH_2_KEYS_DOC,
+              PERSONAL_ACCTS_DOC,
               PostingPlatform.TWITTER,
               oAuth2Payload
             );
@@ -261,35 +298,57 @@ export class SocialAuthService {
   }
 
   signInWithYoutube() {
+    this.conectionsLoadingSubject.next(true);
     this.youtubeAuthRepo.getRequestToken();
   }
 
-  getLinkedInCredentials() { return this.linkedinAuthRepo.authCodeParams; }
+  getLinkedInCredentials() {
+    return this.linkedinAuthRepo.authCodeParams;
+  }
 
   getLinkedInAccessToken(authCode: string) {
-    this.linkedinAuthRepo.exchanceAuthCodeForAccessToken(authCode).pipe(
-      concatMap((accessTokenObj: { message: string, data: any }) => {
-        console.log("🚀 ~ file: socialauth.service.ts:255 ~ SocialAuthService ~ concatMap ~ accessTokenObj:", accessTokenObj)
-        return this.firestoreRepo.updateCurrentUserCollectionDocument(
-          USER_OAUTH_2_KEYS_DOC,
-          PostingPlatform.LINKEDIN,
-          accessTokenObj 
-      )}
-    )).subscribe({
-      next: (result) => {
-        console.log('🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result', result);
-        if (result) {
-          this.linkedinAuthSubject.next(true);
-        } else {
-          this.errorSubject.next('LinkedIn Auth Error');
-        }
-        this.navigationService.navigateToRoot();
-      },
-      error: (error) => {
-        this.navigationService.navigateToRoot();
-        this.errorSubject.next(error);
-        console.log('🔥 ~ file: socialaccount.service.ts:235 ~ SocialAccountService ~ .subscribe ~ error', error);
-      }
-    });
+    this.conectionsLoadingSubject.next(true);
+    this.linkedinAuthRepo
+      .exchanceAuthCodeForAccessToken(authCode)
+      .pipe(
+        concatMap((accessTokenObj: { message: string; data: any }) => {
+          console.log(
+            '🚀 ~ file: socialauth.service.ts:255 ~ SocialAuthService ~ concatMap ~ accessTokenObj:',
+            accessTokenObj
+          );
+          return this.firestoreRepo.updateCurrentUserCollectionDocument(
+            PERSONAL_ACCTS_DOC,
+            PostingPlatform.LINKEDIN,
+            {
+              [PLATFORM]: PostingPlatform.LINKEDIN,
+              ...accessTokenObj
+            }
+          );
+        })
+      )
+      .subscribe({
+        next: (result) => {
+          this.conectionsLoadingSubject.next(false);
+          console.log(
+            '🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result',
+            result
+          );
+          if (result) {
+            this.linkedinAuthSubject.next(true);
+          } else {
+            this.errorSubject.next('LinkedIn Auth Error');
+          }
+          this.navigationService.navigateToRoot();
+        },
+        error: (error) => {
+          this.conectionsLoadingSubject.next(false);
+          this.errorSubject.next(error);
+          console.log(
+            '🔥 ~ file: socialaccount.service.ts:235 ~ SocialAccountService ~ .subscribe ~ error',
+            error
+            );
+          this.navigationService.navigateToRoot();
+        },
+      });
   }
 }

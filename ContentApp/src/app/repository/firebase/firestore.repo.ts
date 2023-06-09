@@ -1,9 +1,10 @@
-import { Firestore, collectionData, collection, doc, setDoc, getDoc, getDocs, updateDoc, query, where, Query, addDoc, DocumentSnapshot, DocumentData } from '@angular/fire/firestore';
+import { Firestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, query, where, Query, addDoc, DocumentSnapshot, DocumentData } from '@angular/fire/firestore';
 import { concatMap, filter, map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { FireAuthRepository } from './fireauth.repo';
 import { Injectable } from '@angular/core';
 import { Observable, from, of } from 'rxjs';
+import { fireConverter } from './fire.converter';
 
 /**
  * Collection and Docuemnts Architecture
@@ -11,8 +12,7 @@ import { Observable, from, of } from 'rxjs';
 export const PURCHASED_USERS_COL = 'purchased_users';
 
 export const USERS_COL = 'users';
-export const USER_SOCIAL_MEDIA_HANDLES_DOC = 'social_media_handles';
-export const USER_OAUTH_2_KEYS_DOC = 'oAuth2Keys';
+export const PERSONAL_ACCTS_DOC = 'personal_accounts';
 
 export const PostingPlatform = {
   FACEBOOK: 'facebook',
@@ -27,6 +27,8 @@ export const PostingPlatform = {
 /**
  * Accounts and Oauth 2.0
  */
+export const PLATFORM = 'platform';
+export const HANDLE = 'handle';
 export const ACCESS_TOKEN = 'access_token';
 export const LAST_LOGIN_AT = 'last_login_at';
 export const CREATION_TIME = 'creation_time';
@@ -147,7 +149,6 @@ export class FirestoreRepository {
     userId: string
   ): Observable<T[]> {
     const collectionRef = collection(this.firestore, USERS_COL, userId, collectionPath);
-    // const querySnapshot = getDocs(collectionRef).
     return from(getDocs(collectionRef)).pipe(
       map((querySnapshot) => {
         const data: T[] = [];

@@ -1,9 +1,13 @@
+<!-- Scripts -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/platform.js?onload=onGoogleLibraryLoad" async defer></script>
+
 <!-- Navigation bar -->
 <p-menubar [model]="items">
   <ng-template pTemplate="start">
     <div class="horizontal-container">
       <img src="https://primefaces.org/cdn/primeng/images/primeng.svg" height="40" class="mr-2" />
-      <h3>Content Calendar</h3>
+      <h3>Content Automation Calendar</h3>
     </div>
   </ng-template>
   <ng-template pTemplate="end">
@@ -21,9 +25,12 @@
   </ng-template>
 </p-menubar>
 
-<p-dialog header="Please Login To Your Socials" [(visible)]="accountsVisible" [modal]="true" [style]="{ width: '40vw' }" [draggable]="false" [resizable]="false">
+<p-dialog header="Please Login To Your Socials" [(visible)]="accountsVisible" [modal]="true" [style]="{ width: '60vw', height: '50vw' }" [draggable]="false" [resizable]="false">
   <app-account-hub [parentFocusedConnection]="focusedAccount"></app-account-hub>
 </p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 <!-- Begin Dashboard Code -->
 <!-- SIDEBAR -->
 <!-- <section id="sidebar" [ngClass]="status ? 'hide' : ''">
@@ -82,8 +89,10 @@
     </a>
   </nav> -->
 <!-- NAVBAR -->
+
 <!-- MAIN -->
 <router-outlet></router-outlet>
 <!-- MAIN -->
+
 <!-- </section> -->
 <!-- CONTENT -->

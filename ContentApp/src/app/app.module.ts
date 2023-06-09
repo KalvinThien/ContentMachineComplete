@@ -29,6 +29,12 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LinkedinRedirectComponent } from './views/redirects/linkedinredirect.component';
 import { FacebookRedirectComponent } from './views/redirects/facebookredirect.component';
 import { InputTextModule } from 'primeng/inputtext';
+import { SplitterModule } from 'primeng/splitter';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
+import { AccordionModule } from 'primeng/accordion';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -57,9 +63,13 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     HomeComponent,
     AccounthubComponent,
     LinkedinRedirectComponent,
-    FacebookRedirectComponent
+    FacebookRedirectComponent,
   ],
   imports: [
+    AccordionModule,
+    ToastModule,
+    ConfirmDialogModule,
+    SplitterModule,
     InputTextModule,
     ProgressSpinnerModule,
     TabViewModule,
@@ -81,8 +91,10 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     FirebaseUIModule.forRoot(firebaseUiAuthConfig)
   ],
-  providers: [  
-   ],
+  providers: [ 
+    ConfirmationService,
+    MessageService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
