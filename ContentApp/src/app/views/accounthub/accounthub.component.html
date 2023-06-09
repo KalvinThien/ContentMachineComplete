@@ -2,7 +2,7 @@
   <p-progressSpinner 
     *ngIf="isAccountsLoading"
     class="col flex align-items-center justify-content-center"
-    styleClass="w-4rem h-4rem" 
+    styleClass="w-2rem h-2rem" 
     strokeWidth="4" 
     fill="var(--surface-ground)" 
     animationDuration=".5s">
@@ -27,7 +27,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onTwitterLogin()" [disabled]="twitterConnected">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem" />
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" />
           </p-button>
         </p-footer>
       </div>
@@ -52,7 +52,7 @@
         <p-footer>
           <button pButton type="button" label="Connect" icon="pi pi-plus" styleClass="p-button-success"
           [disabled]="facebookConnected" (click)="onFacebookLogin()">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem" /></button>
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" /></button>
         </p-footer>
       </div>
       <div class="column">
@@ -84,7 +84,7 @@
     </ul>
     <input pInputText style="width: 100%;" type="text" class="p-inputtext-lg" placeholder="Settings > Security and apps > Integration Token" [(ngModel)]="mediumIntegKey" />
     <p-button label="Submit" (click)="onMediumSubmit()" [disabled]="mediumConnected">
-      <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem" />
+      <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" />
     </p-button>
   </p-tabPanel>
   <p-tabPanel header="youtube" [disabled]="youtubeConnected">
@@ -102,7 +102,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onYoutubeLogin()" [disabled]="youtubeConnected">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem"/>
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem"/>
           </p-button>
         </p-footer>
       </div>
@@ -128,7 +128,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onLinkedinLogin()" [disabled]="linkedinConnected">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-4rem h-4rem"/>
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem"/>
           </p-button>
         </p-footer>
       </div>
