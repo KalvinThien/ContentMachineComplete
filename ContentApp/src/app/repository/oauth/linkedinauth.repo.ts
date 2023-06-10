@@ -24,7 +24,7 @@ export class LinkedinAuthRepository {
 
   exchanceAuthCodeForAccessToken(linkedInAuthCode: string): Observable<any> {
     return from(
-      axios.get<{message: string, data: any}>('http://localhost:3000/api/main/linkedin', {
+      axios.get<{message: string, data: any}>('http://localhost:5000/api/linkedin', {
         params: {
           authCode: linkedInAuthCode,
         }
