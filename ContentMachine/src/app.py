@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import appsecrets
+import text_machine as text_machine
 
 app = Flask(__name__)
 CORS(app)
@@ -51,13 +52,16 @@ def facebook_callback():
         print("🚀 ~ error:", str(e))
         return jsonify({ 'Authentication failed.', 500 })
 
-@app.route('/api/process-data', methods=['POST'])
-def process_data():
+@app.route('/api/schedule-text-posts', methods=['POST'])
+def text_to_content():
     data = request.json
-    # Perform necessary computations using the input data
-    result = data['name'] + ' is ' + str(data['age']) + ' years old'
-    # Return the result as JSON response
-    return jsonify(result=result)
+    userUuid = data['userUuid']
+    content = data['content']
+    image = data['image']
+    
+    bool_result = text_machine.process_text(userUuid, content, image)
+
+    return jsonify(result=bool_result)
 
 if __name__ == '__main__':
     app.run(debug=True)

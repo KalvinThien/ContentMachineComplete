@@ -133,10 +133,8 @@ ContentApp/.editorconfig
 ContentApp/.vscode/
 ContentApp/appsecrets.ts
 
-ContentBackbone/node_modules
-ContentBackbone/.firebase
-ContentBackbone/pnpm-lock.yaml
-ContentBackbone/package-lock.json
-ContentBackbone/appsecrets.js
+environments/
 
 *.cache
+ContentMachine/src/appsecrets.py
+ContentMachine/src/appsecrets.py

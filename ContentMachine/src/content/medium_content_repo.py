@@ -75,7 +75,7 @@ def post_medium_blog_article( schedule_datetime_str ):
     else:
         print(f"🔥 MD Error creating post: {response.status_code} - {response.text}") 
 
-def schedule_medium_article(blog):
+def schedule_medium_article(blog, image_query='technology'):
     if (blog is None or blog == ''):
         print('🔥 Error scheduling MD')
         return ''
@@ -84,7 +84,7 @@ def schedule_medium_article(blog):
         blog = text_utils.groom_body(blog)
         parts = blog.split('\n\n', 1)
         image_src = image_creator.get_unsplash_image_url(
-            'technology', 
+            image_query, 
             PostingPlatform.MEDIUM, 
             'landscape'
         )
