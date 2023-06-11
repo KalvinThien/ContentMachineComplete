@@ -5,7 +5,7 @@ import meta_graph_api.meta_tokens as meta_tokens
 from domain.endpoint_definitions import make_api_call
 import media.image_creator as image_creator
 from storage.dropbox_storage import DB_FOLDER_REFORMATTED, upload_file_for_sharing_url
-from storage.firebase_storage import firebase_storage_instance, PostingPlatform
+from storage.firebase_storage import firestore_instance, PostingPlatform
 import json
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
@@ -53,7 +53,7 @@ def schedule_ig_video_post( caption, db_remote_path ):
     params['caption'] = caption
 
     remote_media_obj = create_ig_media_object( params, False )
-    upload_result = firebase_storage_instance.upload_scheduled_post(PostingPlatform.INSTAGRAM, remote_media_obj)
+    upload_result = firestore_instance.upload_scheduled_post(PostingPlatform.INSTAGRAM, remote_media_obj)
     print(f'⏰ IG scheduled! {upload_result}')
 
 def get_ig_container_status( ig_container_id, params ):
@@ -147,7 +147,7 @@ def make_ig_api_call_with_token( firebase_params ):
         return publish_response
 
 def post_scheduled_ig_post( schedule_datetime_str ):
-    post_params_json = firebase_storage_instance.get_specific_post(
+    post_params_json = firestore_instance.get_specific_post(
         PostingPlatform.INSTAGRAM, 
         schedule_datetime_str
     )
@@ -182,26 +182,26 @@ def post_scheduled_ig_post( schedule_datetime_str ):
 #     return make_api_call( url=url, req_params=endpointParams, type='POST' ) # make the api call
 
 def post_ig_media_post(is_testmode=False):
-    return firebase_storage_instance.upload_if_ready(
+    return firestore_instance.upload_if_ready(
         PostingPlatform.INSTAGRAM,
         post_scheduled_ig_post,
         is_test = is_testmode
     )
 
-def schedule_ig_image_post( caption, image_query ):
+def schedule_ig_image_post( user_id, caption, image_query ):
     '''
     Method called from main class that creates our endpoint request and makes the API call.
 
     @returns: nothing
     '''
-    params = meta_tokens.fetch_personal_access_token() 
+    params = meta_tokens.fetch_personal_access_token(user_id) 
     params['media_type'] = 'IMAGE' 
         
     params['media_url'] = image_creator.get_unsplash_image_url(image_query, PostingPlatform.INSTAGRAM) 
     params['caption'] = caption
         
     remote_media_obj = create_ig_media_object( params, False ) 
-    firebase_storage_instance.upload_scheduled_post(PostingPlatform.INSTAGRAM, remote_media_obj)
+    firestore_instance.upload_scheduled_post(user_id, PostingPlatform.INSTAGRAM, remote_media_obj)
 
 def monitor_ig_upload_status( ig_upload_response, post_params, publish_func ):	
     upload_container_id = ig_upload_response['json_data']['id'] # id of the media object that was created

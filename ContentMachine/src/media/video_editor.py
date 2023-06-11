@@ -5,7 +5,7 @@ import json
 import appsecrets as appsecrets
 import utility.utils as utils
 import media.image_creator as image_creator
-from storage.firebase_storage import firebase_storage_instance, PostingPlatform
+from storage.firebase_storage import firestore_instance, PostingPlatform
 import ai.speech_synthesis as speech_synthesis
 import time
 
@@ -138,7 +138,7 @@ def create_video_json( image_query, mp3_duration, mp3_remote_path ):
     image_array = get_simple_scene_images(image_query, scene_comments)
 
     scene_duration = mp3_duration / len(image_array)
-    mp3_ref_url = firebase_storage_instance.get_url(mp3_remote_path)
+    mp3_ref_url = firestore_instance.get_url(mp3_remote_path)
     print(f'processing mp3 of duration: {mp3_duration} and {len(image_array)} images')
 
     video_params = {

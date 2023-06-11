@@ -24,19 +24,19 @@ def run_text_machine( user_uuid, content_summary, image_query ):
       # we need to consider the posting numbers
         
       ig_caption = gpt.get_gpt_generated_text(prompt_source=os.path.join('src', 'input_prompts', 'instagram.txt'))
-      ig_content_repo.schedule_ig_image_post(content_summary, image_query)
+      ig_content_repo.schedule_ig_image_post(user_uuid, ig_caption, image_query)
       
       # FACEBOOK 
       fb_caption = gpt.get_gpt_generated_text(prompt_source=os.path.join('src', 'input_prompts', 'facebook.txt'))
-      fb_content_repo.schedule_fb_post(content_summary, image_query)
+      fb_content_repo.schedule_fb_post(user_uuid, fb_caption, image_query)
 
       # BLOG AND PROMOS
       blog_caption = gpt.get_gpt_generated_text(prompt_source=os.path.join('src', 'input_prompts', 'blog.txt'))
-      medium_content_repo.schedule_medium_article(blog_caption, image_query)
+      medium_content_repo.schedule_medium_article(user_uuid, blog_caption, image_query)
       
       # TWEETS
       tweet = gpt.get_gpt_generated_text(prompt_source=os.path.join('src', 'input_prompts', 'twitter.txt'))
-      twitter_content_repo.schedule_tweet(tweet, image_query)
+      twitter_content_repo.schedule_tweet(user_uuid, tweet, image_query)
           
       print('Finished as SUCCESS')
       return True

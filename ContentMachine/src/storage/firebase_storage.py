@@ -112,10 +112,10 @@ class FirebaseStorage():
             return ''
 
     @classmethod
-    def get_latest_scheduled_datetime( self, platform ):
+    def get_latest_scheduled_datetime( self, user_id, platform ):
         scheduled_posts_path = platform.value + self.POSTS_COLLECTION_APPEND_PATH
 
-        collection = self.firestore.child(scheduled_posts_path).get().each()
+        collection = self.firestore.child(user_id).child(scheduled_posts_path).get().each()
 
         if (collection is None):
             return scheduler.get_best_posting_time(platform)
@@ -155,8 +155,8 @@ class FirebaseStorage():
                     return document_json
 
     @classmethod
-    def upload_scheduled_post( self, platform, payload ):
-        last_posted_time = self.get_latest_scheduled_datetime(platform)
+    def upload_scheduled_post( self, user_id, platform, payload ):
+        last_posted_time = self.get_latest_scheduled_datetime(user_id, platform)
 
         if (last_posted_time == '' or last_posted_time is None):
             future_publish_date = scheduler.get_best_posting_time(platform)
@@ -164,7 +164,7 @@ class FirebaseStorage():
             future_publish_date = scheduler.get_best_posting_time(platform, last_posted_time)
 
         specific_collection = platform.value + "_" + self.POSTS_COLLECTION
-        result = self.firestore.child(specific_collection).update({
+        result = self.firestore.child(user_id).child(specific_collection).update({
             future_publish_date: payload
         })
         return result
@@ -178,11 +178,11 @@ class FirebaseStorage():
     
     @classmethod
     def upload_if_ready( self, platform, api_fun, is_test=False ):
-        earliest_scheduled_datetime_str = firebase_storage_instance.get_earliest_scheduled_datetime(platform)
+        earliest_scheduled_datetime_str = firestore_instance.get_earliest_scheduled_datetime(platform)
         while (time_utils.is_expired(earliest_scheduled_datetime_str) and is_test == False):
             print(f'❌ {platform.value} Expired! Deleting post')
             self.delete_post(platform, earliest_scheduled_datetime_str)
-            earliest_scheduled_datetime_str = firebase_storage_instance.get_earliest_scheduled_datetime(platform)
+            earliest_scheduled_datetime_str = firestore_instance.get_earliest_scheduled_datetime(platform)
 
         if (earliest_scheduled_datetime_str == '' or earliest_scheduled_datetime_str is None): 
             return 'no posts scheduled'
@@ -199,4 +199,4 @@ class FirebaseStorage():
             return f'{platform.value} time not within posting window' 
 
 #static instances
-firebase_storage_instance = FirebaseStorage()
+firestore_instance = FirebaseStorage()

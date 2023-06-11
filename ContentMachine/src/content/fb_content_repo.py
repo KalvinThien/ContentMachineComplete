@@ -4,7 +4,7 @@ import meta_graph_api.meta_tokens as meta_tokens
 from domain.endpoint_definitions import make_api_call
 import media.image_creator as image_creator
 import appsecrets as appsecrets
-from storage.firebase_storage import firebase_storage_instance, PostingPlatform
+from storage.firebase_storage import firestore_instance, PostingPlatform
 import domain.url_shortener as url_shortener
 import storage.dropbox_storage as dropbox_storage
 import ai.gpt as gpt
@@ -97,7 +97,7 @@ def post_content( params, firebase_object ):
         return response
 
 def post_scheduled_fb_post( scheduled_datetime_str ):
-    firebase_json = firebase_storage_instance.get_specific_post(
+    firebase_json = firestore_instance.get_specific_post(
         PostingPlatform.FACEBOOK, 
         scheduled_datetime_str
     )
@@ -118,7 +118,7 @@ def post_to_facebook(is_testmode=False):
 
     @returns: nothing
     '''
-    return firebase_storage_instance.upload_if_ready(
+    return firestore_instance.upload_if_ready(
         PostingPlatform.FACEBOOK,
         post_scheduled_fb_post,
         is_test = is_testmode
@@ -136,7 +136,7 @@ def schedule_fb_post( caption, image_query ):
         'message': caption, 
         'published' : True
     }
-    result = firebase_storage_instance.upload_scheduled_post(
+    result = firestore_instance.upload_scheduled_post(
         PostingPlatform.FACEBOOK, 
         payload
     )
@@ -174,7 +174,7 @@ def schedule_fb_video_post( caption, db_remote_path ):
         'message': caption, 
         'published' : True
     }
-    result = firebase_storage_instance.upload_scheduled_post(
+    result = firestore_instance.upload_scheduled_post(
         PostingPlatform.FACEBOOK, 
         payload
     )

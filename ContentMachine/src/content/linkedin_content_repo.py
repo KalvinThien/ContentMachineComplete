@@ -3,7 +3,7 @@ import os
 import json
 import requests
 import domain.linkedin_auth as li_auth
-from storage.firebase_storage import firebase_storage_instance, PostingPlatform
+from storage.firebase_storage import firestore_instance, PostingPlatform
 from domain.endpoint_definitions import make_api_call
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
@@ -83,7 +83,7 @@ def post_linkedin_link_message():
 
 def post_linkedin_user_message( scheduled_datetime_str ):
     #get post from firebase
-    post_params_json = firebase_storage_instance.get_specific_post(
+    post_params_json = firestore_instance.get_specific_post(
         PostingPlatform.LINKEDIN, 
         scheduled_datetime_str
     )
@@ -128,7 +128,7 @@ def post_linkedin_user_message( scheduled_datetime_str ):
     return result
 
 def post_to_linkedin(is_testmode=False): 
-    return firebase_storage_instance.upload_if_ready(
+    return firestore_instance.upload_if_ready(
         PostingPlatform.LINKEDIN, 
         post_linkedin_user_message,
         is_test = is_testmode
@@ -141,7 +141,7 @@ def schedule_linkedin_post( text ):
     
     payload = dict()
     payload['text'] = text
-    result = firebase_storage_instance.upload_scheduled_post(
+    result = firestore_instance.upload_scheduled_post(
         PostingPlatform.LINKEDIN, 
         payload
     )

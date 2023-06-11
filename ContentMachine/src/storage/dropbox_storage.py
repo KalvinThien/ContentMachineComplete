@@ -3,7 +3,7 @@ import os
 import dropbox
 import utility.file_utils as file_utils
 from dropbox.exceptions import AuthError
-from storage.firebase_storage import firebase_storage_instance
+from storage.firebase_storage import firestore_instance
 import appsecrets
 import requests
 
@@ -14,7 +14,7 @@ DB_FOLDER_REFORMATTED = '/ShortVideoReformatted'
 
 def initialize_dropbox():
         """Create a connection to Dropbox."""
-        token = firebase_storage_instance.get_complete_access_token(firebase_storage_instance.DROPBOX_ACCESS_TOKEN)
+        token = firestore_instance.get_complete_access_token(firestore_instance.DROPBOX_ACCESS_TOKEN)
         if (token is None or token == ''):  
             # get code here first : https://www.dropbox.com/oauth2/authorize?client_id=9vlc2zeelddxzek&token_access_type=offline&response_type=code 
             # Get the refresh token
@@ -29,8 +29,8 @@ def initialize_dropbox():
             response_json = response.json()
             REFRESH_TOKEN = response_json['refresh_token']
 
-            firebase_storage_instance.put_complete_access_token(
-                firebase_storage_instance.DROPBOX_ACCESS_TOKEN,
+            firestore_instance.put_complete_access_token(
+                firestore_instance.DROPBOX_ACCESS_TOKEN,
                 REFRESH_TOKEN
             )
             token = REFRESH_TOKEN

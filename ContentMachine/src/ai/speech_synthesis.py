@@ -1,7 +1,7 @@
 import sys
 import os
 import appsecrets as appsecrets
-from storage.firebase_storage import firebase_storage_instance
+from storage.firebase_storage import firestore_instance
 import audioread
 import requests
 import json
@@ -67,7 +67,7 @@ def get_speech_mp3_from_text( voice_id, text ):
         print("Audio saved to output.mp3")
 
         print("Speech synthesized!")
-        firebase_storage_instance.upload_file_to_storage(
+        firestore_instance.upload_file_to_storage(
             remote_storage_path = full_remote_path,
             local_path = full_local_path
         ) 

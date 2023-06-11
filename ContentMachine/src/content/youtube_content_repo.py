@@ -6,7 +6,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
 import ai.gpt as gpt3
-from storage.firebase_storage import firebase_storage_instance, PostingPlatform
+from storage.firebase_storage import firestore_instance, PostingPlatform
 import storage.dropbox_storage as dropbox_storage
 import pickle
 import json
@@ -94,7 +94,7 @@ def complete_scheduling_and_posting_of_video ( remote_video_path ):
     try:
         response = request.execute()
         print(f'⏰ YT posting scheduled!\n{response}')   
-        firebase_storage_instance.upload_scheduled_post(
+        firestore_instance.upload_scheduled_post(
             PostingPlatform.YOUTUBE,
             payload = {
                 "title": title,
@@ -135,7 +135,7 @@ def scheduled_youtube_video ( remote_video_url ):
     payload['remote_video_url'] = remote_video_url
     payload['tags']: tags_array
 
-    result = firebase_storage_instance.upload_scheduled_post(
+    result = firestore_instance.upload_scheduled_post(
         PostingPlatform.YOUTUBE,
         payload
     )
@@ -178,14 +178,14 @@ def get_youtube_credentials():
         return credentials
 
 def post_previously_scheduled_youtube_video():
-    earliest_scheduled_datetime_str = firebase_storage_instance.get_earliest_scheduled_datetime(PostingPlatform.YOUTUBE)
+    earliest_scheduled_datetime_str = firestore_instance.get_earliest_scheduled_datetime(PostingPlatform.YOUTUBE)
     if (earliest_scheduled_datetime_str == ''): 
         return 'no posts scheduled'
     
     ready_to_post = time_utils.is_current_posting_time_within_window(earliest_scheduled_datetime_str)
     if (ready_to_post):  
         print(f'✅ YT earliest_scheduled_datetime_str: {earliest_scheduled_datetime_str} coincides with already scheduled time')
-        response = firebase_storage_instance.delete_post(
+        response = firestore_instance.delete_post(
             PostingPlatform.YOUTUBE, 
             earliest_scheduled_datetime_str
         )
