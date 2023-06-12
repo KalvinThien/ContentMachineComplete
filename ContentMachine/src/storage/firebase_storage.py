@@ -6,7 +6,6 @@ from enum import Enum
 import json
 import utility.scheduler as scheduler
 import utility.time_utils as time_utils
-from ..environments.environment import FIREBASE_CONFIG
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -34,7 +33,7 @@ class FirebaseStorage():
     BLOGS_COLLECTION = "posted_blogs" 
 
     # Initializations    
-    firebase = pyrebase.initialize_app(json.loads(FIREBASE_CONFIG))
+    firebase = pyrebase.initialize_app(appsecrets.FIREBASE_CONFIG)
     firestore = firebase.database()
     storage = firebase.storage()
 

@@ -27,6 +27,8 @@ export const PostingPlatform = {
 /**
  * Accounts and Oauth 2.0
  */
+export const DISPLAY_NAME = 'display_name';
+export const USER_ID = 'user_id';
 export const PLATFORM = 'platform';
 export const HANDLE = 'handle';
 export const ACCESS_TOKEN = 'access_token';
@@ -44,6 +46,29 @@ export class FirestoreRepository {
     private firestore: Firestore,
     private fireAuth: FireAuthRepository
   ) {}
+
+  getDocumentAsUser<T>(collectionPath: string, documentKey: string): Observable<T> {
+    return this.fireAuth.getUserAuthObservable().pipe(
+      concatMap((user: any) => {
+        const collectionRef =  collection(this.firestore, USERS_COL, user.uid, collectionPath);
+        const docRef = doc(collectionRef, documentKey);
+
+        return from(getDoc(docRef)).pipe(  
+          tap((data) => {
+            if (!environment.production) {
+              console.groupCollapsed(
+                `❤️‍🔥 Firestore Streaming [${docRef.path}] [getDocumentAsUser] [${user.uid}]`
+              );
+              console.log(data);
+              console.groupEnd();
+            }
+          }),
+          filter((data) => !!data),
+          map((data) => data.data() as T)
+        );
+      })
+    );
+  }
 
   // Create a single data object under a user ID
   async createUserDocument<T>(
@@ -88,7 +113,7 @@ export class FirestoreRepository {
     return setDoc(newDocRef, {}); // Set an empty object to the document
   }
 
-  getUsersDocument(
+  getUserInfoAsDocument(
     collectionPath: string,
     documentKey: string,
     userId: string = this.fireAuth.currentSessionUser?.uid || ''
@@ -96,16 +121,16 @@ export class FirestoreRepository {
     if (userId === '') {
       return this.fireAuth.getUserAuthObservable().pipe(
         concatMap((user) => {
-          return this.getSpecificUserDoc(collectionPath, documentKey, user.uid);
+          return this.getSpecificUserInfoDoc(collectionPath, documentKey, user.uid);
         })
       );
     } else {
-      return this.getSpecificUserDoc(collectionPath, documentKey, userId);
+      return this.getSpecificUserInfoDoc(collectionPath, documentKey, userId);
     }
   }
 
 
-  private getSpecificUserDoc(
+  private getSpecificUserInfoDoc(
     collectionPath: string,
     documentKey: string,
     userId: string

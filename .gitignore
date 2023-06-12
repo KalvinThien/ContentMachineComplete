@@ -138,3 +138,4 @@ environments/
 *.cache
 ContentMachine/src/appsecrets.py
 ContentMachine/src/appsecrets.py
+ContentMachine/src/appsecrets.py

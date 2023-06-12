@@ -1,17 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { SocialAuthService } from '../../service/socialauth.service';
 import { SocialAccount } from 'src/app/model/socialaccount.model';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { PostingPlatform } from 'src/app/repository/firebase/firestore.repo';
+import { FacebookPage } from 'src/app/model/facebookpage.model';
 
 @Component({
   selector: 'app-account-hub',
   templateUrl: './accounthub.component.html',
   styleUrls: ['./accounthub.component.css']
 })
-export class AccounthubComponent implements OnInit {
+export class AccounthubComponent implements OnInit, OnChanges {
 
-  @Input() parentFocusedConnection = 0
+  @Input() parentFocusedConnection = 0;
 
   personalAccounts: SocialAccount[] = [];
   
@@ -25,6 +26,21 @@ export class AccounthubComponent implements OnInit {
   mediumConnected = false;
   
   mediumIntegKey: string = '';
+
+  faceebookAuthMenuItems: MenuItem[] = [
+    {
+      label: 'Facebook Login',
+    },
+    {
+      label: 'Select Page',
+    },
+    {
+      label: 'Select Instagram',
+    }
+  ];
+  facebookAuthMenuItemIndex = 0;
+  userFacebookPages: FacebookPage[] = [];
+  userSelectedFacebookPage: any;
   
   constructor(
     private socialAuthService: SocialAuthService,
@@ -35,7 +51,70 @@ export class AccounthubComponent implements OnInit {
       this.setupObservers();
       this.socialAuthService.getPersonalAccounts();
     }
-    
+
+    ngOnChanges(changes: SimpleChanges): void {
+      if (changes['parentFocusedConnection']) {
+        if (changes['parentFocusedConnection'].currentValue === 1) {
+          this.facebookAuthMenuItemIndex = 1;
+          this.socialAuthService.getFacebookPages();
+        }
+      }
+    }
+
+    private setupObservers() {
+      this.socialAuthService.getFacebookPagesObservable$.subscribe({
+        next: (pages) => {
+          this.userFacebookPages = pages;
+        }
+      });
+      this.socialAuthService.getPersonalAccountsObservable$.subscribe({
+        next: (accounts) => {
+          this.isAccountsLoading = false;
+          this.personalAccounts = accounts;
+          this.personalAccounts.forEach((account) => {
+            // we should only label as connected if a FB page and IG is connected
+            if (account.platform === PostingPlatform.FACEBOOK) {
+              this.facebookConnected = true;
+            } else if (account.platform === PostingPlatform.LINKEDIN) {
+              this.linkedinConnected = true;
+            } else if (account.platform === PostingPlatform.MEDIUM) {
+              this.mediumConnected = true;
+            } else if (account.platform === PostingPlatform.YOUTUBE) {
+              this.youtubeConnected = true;
+            } else if (account.platform === PostingPlatform.TWITTER) {
+              this.twitterConnected = true;
+            } else {
+              this.messageService.add({ severity: 'danger', summary: 'Opps! Sorry about that.', detail: `Unknown platform: ${account.platform}` });
+            }
+          });
+        },
+        error: (error) => {
+          this.isAccountsLoading = false;
+          this.messageService.add({ severity: 'danger', summary: 'Opps! Sorry about that.', detail: `${error}` });
+        }
+      });
+      this.socialAuthService.getYoutubeAuthObservable$.subscribe({
+        next: (isConnected) => {
+          this.youtubeConnected = isConnected;
+        },
+        error: (error) => {
+          this.messageService.add({ severity: 'danger', summary: 'Opps! Sorry about that.', detail: `${error}` });
+        },
+      });
+      this.socialAuthService.getTwitterAuthObservable$.subscribe((isConnected) => {
+        this.twitterConnected = isConnected;
+      })
+      this.socialAuthService.getConnectionLoadingObservable$.subscribe((isLoading) => {
+        this.isLoading = isLoading;
+      });
+      this.socialAuthService.getErrorObservable$.subscribe((error) => {
+        this.messageService.add({ severity: 'danger', summary: 'Opps! Sorry about that.', detail: `${error}` });
+      });
+      this.socialAuthService.getMediumAuthObservable$.subscribe((isConnected) => {
+        this.mediumConnected = isConnected;
+      });
+    }
+
     onFacebookLogin() {
       // this.socialAuthService.signInWithFacebook();
       const params = {
@@ -64,53 +143,21 @@ export class AccounthubComponent implements OnInit {
       this.socialAuthService.signInWithMedium(this.mediumIntegKey);
     }
 
-    private setupObservers() {
-      this.socialAuthService.getPersonalAccountsObservable$.subscribe({
-        next: (accounts) => {
-          console.log("🚀 ~ file: accounthub.component.ts:74 ~ AccounthubComponent ~ setupObservers ~ accounts:", accounts)
-          this.isAccountsLoading = false;
-          this.personalAccounts = accounts;
-          this.personalAccounts.forEach((account) => {
-            if (account.platform === PostingPlatform.FACEBOOK) {
-              this.facebookConnected = true;
-            } else if (account.platform === PostingPlatform.LINKEDIN) {
-              this.linkedinConnected = true;
-            } else if (account.platform === PostingPlatform.MEDIUM) {
-              this.mediumConnected = true;
-            } else if (account.platform === PostingPlatform.YOUTUBE) {
-              this.youtubeConnected = true;
-            } else if (account.platform === PostingPlatform.TWITTER) {
-              this.twitterConnected = true;
-            } else {
-              this.messageService.add({ severity: 'danger', summary: 'Opps! Sorry about that.', detail: `Unknown platform: ${account.platform}` });
-            }
-          });
-        },
-        error: (error) => {
-          this.isAccountsLoading = false;
-          this.messageService.add({ severity: 'danger', summary: 'Opps! Sorry about that.', detail: `${error}` });
-        }
-      });
-      this.socialAuthService.getYoutubeAuthObservable$.subscribe({
-        next: (isConnected) => {
-          this.youtubeConnected = isConnected;
-        },
-        error: (error) => {
-          console.log("🚀 ~ file: accounthub.component.ts:30 ~ AccounthubComponent ~ ngOnInit ~ error:", error)
-        },
-      });
-      this.socialAuthService.getTwitterAuthObservable$.subscribe((isConnected) => {
-        this.twitterConnected = isConnected;
-      })
-      this.socialAuthService.getConnectionLoadingObservable$.subscribe((isLoading) => {
-        this.isLoading = isLoading;
-      });
-      this.socialAuthService.getErrorObservable$.subscribe((error) => {
-        this.messageService.add({ severity: 'danger', summary: 'Opps! Sorry about that.', detail: `${error}` });
-      });
-      this.socialAuthService.getMediumAuthObservable$.subscribe((isConnected) => {
-        this.mediumConnected = isConnected;
-      });
+    onFacebookAuthIndexChange(currIndex: number) {
+      let nextIndex = currIndex;
+      if (currIndex < 2) {
+        nextIndex = currIndex + 1;
+      }
+      // take action
+      if (this.facebookAuthMenuItemIndex === 0) {
+        // this.socialAuthService.getFacebookPages();
+      }
+      // update index after action
+      this.facebookAuthMenuItemIndex = nextIndex;
+    }
+
+    onFacebookPageSelected() {
+      throw new Error('Method not implemented.');
     }
 }
 

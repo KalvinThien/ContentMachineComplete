@@ -43,7 +43,7 @@ def initialize_dropbox():
         print('DBox init OK')
         return dbx        
 
-dbx = initialize_dropbox() 
+# dbx = initialize_dropbox() 
 
 def bulk_download_prompts():
     # Get a list of all the files in the folder

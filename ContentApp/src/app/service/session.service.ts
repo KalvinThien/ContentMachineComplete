@@ -76,7 +76,7 @@ export class SessionService {
   }
 
   verifyPurchaseEmail(email: string): Observable<boolean> {
-    return this.firestoreRepo.getUsersDocument(PURCHASED_USERS_COL, email).pipe(
+    return this.firestoreRepo.getUserInfoAsDocument(PURCHASED_USERS_COL, email).pipe(
       map((doc) => {
         if (doc !== undefined) {
           return true;
@@ -157,7 +157,7 @@ export class SessionService {
     };
 
     // Check if the user document exists
-    this.firestoreRepo.getUsersDocument(USERS_COL, user.uid).subscribe((doc) => {
+    this.firestoreRepo.getUserInfoAsDocument(USERS_COL, user.uid).subscribe((doc) => {
       if (doc !== undefined) {
         console.log("🚀 ~ Updating user")
         // User exists, update the existing user data
