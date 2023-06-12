@@ -1,2 +1,1 @@
-Write me a pull request summary for the following commits. Using markdown include subheaders, code samples, and lists. Using the following template: Pull Request, Summary, Description, Main Updates,  Further Notes
-
+Write me a pull request summary for the following commits without referencing the commits directly.  Your task will be to translate the technical language of the commits into a human readable format for simpler understanding. Using markdown include subheaders, code samples, and lists. Using the following template: Pull Request, Summary, Description, Main Updates,  Further Notes:
