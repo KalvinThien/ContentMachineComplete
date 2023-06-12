@@ -1,18 +1,10 @@
 <div>
-  <p-progressSpinner 
-    *ngIf="isAccountsLoading"
-    class="col flex align-items-center justify-content-center"
-    styleClass="w-2rem h-2rem" 
-    strokeWidth="4" 
-    fill="var(--surface-ground)" 
-    animationDuration=".5s">
+  <p-progressSpinner *ngIf="isAccountsLoading" class="col flex align-items-center justify-content-center"
+    styleClass="w-2rem h-2rem" strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s">
   </p-progressSpinner>
 </div>
-<p-tabView 
-  *ngIf="!isAccountsLoading"
-  styleClass="tabview-custom" 
-  [(activeIndex)]="parentFocusedConnection">
-  <p-tabPanel header="twitter" [disabled]="twitterConnected">
+<p-tabView *ngIf="!isAccountsLoading" styleClass="tabview-custom" [(activeIndex)]="parentFocusedConnection">
+  <p-tabPanel header="twitter">
     <ng-template pTemplate="header">
       <i class="pi pi-twitter" *ngIf="!twitterConnected"></i>
       <i class="pi pi-check" *ngIf="twitterConnected"></i>
@@ -36,31 +28,64 @@
       </div>
     </div>
   </p-tabPanel>
-  <p-tabPanel header="facebook" [disabled]="facebookConnected">
+  <p-tabPanel header="facebook">
     <ng-template pTemplate="header">
       <i class="pi pi-facebook" *ngIf="!facebookConnected"></i>
       <i class="pi pi-check" *ngIf="facebookConnected"></i>
       <span>Facebook</span>
     </ng-template>
-    <div class="container">
-      <div class="column" style="padding: 0.5rem;">
-        <p>
-          To start automating your Facebook and Instagram posts and saving time, simply click the button below to grant
-          our app access to your Facebook account. By doing so, you'll be able to schedule and publish posts seamlessly,
-          without any manual intervention.
-        </p>
-        <p-footer>
-          <button pButton type="button" label="Connect" icon="pi pi-plus" styleClass="p-button-success"
-          [disabled]="facebookConnected" (click)="onFacebookLogin()">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" /></button>
-        </p-footer>
+    <p-steps 
+      [model]="faceebookAuthMenuItems" 
+      [readonly]="true" 
+      [activeIndex]="facebookAuthMenuItemIndex">
+    </p-steps>
+      <!-- First step conenct -->
+      <div class="container" *ngIf="facebookAuthMenuItemIndex === 0">
+        <div class="column" style="padding: 0.5rem;">
+          <p>
+            To start automating your Facebook and Instagram posts and saving time, simply click the button below to
+            grant
+            our app access to your Facebook account. By doing so, you'll be able to schedule and publish posts
+            seamlessly,
+            without any manual intervention.
+          </p>
+          <p-footer>
+            <button pButton type="button" label="Connect" icon="pi pi-plus" styleClass="p-button-success"
+              [disabled]="facebookConnected" (click)="onFacebookLogin()">
+              <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" /></button>
+          </p-footer>
+        </div>
+        <div class="column">
+          <img src="assets/images/facebook_sample.png" alt="facebook" style="width: 20vw; height: 30vw;" />
+        </div>
       </div>
-      <div class="column">
-        <img src="assets/images/facebook_sample.png" alt="facebook" style="width: 20vw; height: 30vw;" />
+      <!-- Second Step. Facebook Page -->
+      <div class="container" *ngIf="facebookAuthMenuItemIndex == 1">
+        <div class="column">
+          <p>Great. We have your facebook pages for you.  Let's start by picking just one.</p>
+          <p>If you would like to connect an Instagram account as well it is important that it is connected to the Facebook page you will select here.</p>
+          <p-listbox [options]="userFacebookPages" [(ngModel)]="userSelectedFacebookPage" optionLabel="page" [style]="{'width':'100%'}">
+            <ng-template let-page pTemplate="item">
+              <div class="flex align-items-center gap-2">
+                  <h4>{{ page.name }}</h4>
+              </div>
+          </ng-template>
+          </p-listbox>
+          <p-footer>
+            <button pButton type="button" label="Continue" icon="pi pi-plus" styleClass="p-button-success"
+              [disabled]="userSelectedFacebookPage == undefined" (click)="onFacebookPageSelected()">
+              <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" /></button>
+          </p-footer>
+        </div>
       </div>
-    </div>
+      <!-- Third Step. Instagram Account -->
+        <div class="container" *ngIf="facebookAuthMenuItemIndex == 1">
+          <div class="column">
+            <p>Congrats your facebook is fully authenticated.  Go ahead and close this dialog and proceed with setting your content on autopilot.</p>
+          </div>
+      </div>
   </p-tabPanel>
-  <p-tabPanel header="medium" [disabled]="mediumConnected">
+  <p-tabPanel header="medium">
     <ng-template pTemplate="header">
       <i class="pi pi-pencil" *ngIf="!mediumConnected"></i>
       <i class="pi pi-check" *ngIf="mediumConnected"></i>
@@ -73,7 +98,8 @@
     </p>
     <ul>
       <li>
-        The first step is to login to your Medium account.  Once there you will need to go to your SETTINGS then your SECURITY AND APPS tab.
+        The first step is to login to your Medium account. Once there you will need to go to your SETTINGS then your
+        SECURITY AND APPS tab.
       </li>
       <li>
         Once there you will need to enter text and click on the GET TOKEN button.
@@ -82,12 +108,13 @@
         Then just copy the token and paste it into the field below.
       </li>
     </ul>
-    <input pInputText style="width: 100%;" type="text" class="p-inputtext-lg" placeholder="Settings > Security and apps > Integration Token" [(ngModel)]="mediumIntegKey" />
+    <input pInputText style="width: 100%;" type="text" class="p-inputtext-lg"
+      placeholder="Settings > Security and apps > Integration Token" [(ngModel)]="mediumIntegKey" />
     <p-button label="Submit" (click)="onMediumSubmit()" [disabled]="mediumConnected">
       <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" />
     </p-button>
   </p-tabPanel>
-  <p-tabPanel header="youtube" [disabled]="youtubeConnected">
+  <p-tabPanel header="youtube">
     <ng-template pTemplate="header">
       <i class="pi pi-youtube" *ngIf="!youtubeConnected"></i>
       <i class="pi pi-check" *ngIf="youtubeConnected"></i>
@@ -102,7 +129,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onYoutubeLogin()" [disabled]="youtubeConnected">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem"/>
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" />
           </p-button>
         </p-footer>
       </div>
@@ -113,7 +140,7 @@
       </div>
     </div>
   </p-tabPanel>
-  <p-tabPanel header="LinkedIn" [disabled]="linkedinConnected" [disabled]="linkedinConnected">
+  <p-tabPanel header="LinkedIn">
     <ng-template pTemplate="header">
       <i class="pi pi-linkedin" *ngIf="!linkedinConnected"></i>
       <i class="pi pi-check" *ngIf="linkedinConnected"></i>
@@ -128,7 +155,7 @@
         </p>
         <p-footer>
           <p-button label="Connect" icon="pi pi-plus" (click)="onLinkedinLogin()" [disabled]="linkedinConnected">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem"/>
+            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" />
           </p-button>
         </p-footer>
       </div>

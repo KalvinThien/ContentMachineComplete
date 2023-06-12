@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import {
   catchError,
+  concat,
   concatMap,
   from,
   map,
@@ -16,10 +17,13 @@ import {
   switchMap,
 } from 'rxjs';
 import {
+  DISPLAY_NAME,
   FirestoreRepository,
   HANDLE,
+  PAGE,
   PLATFORM,
   SCOPE,
+  USER_ID,
   USERS_COL,
 } from '../repository/firebase/firestore.repo';
 import { firebase } from 'firebaseui-angular';
@@ -37,20 +41,24 @@ import {
 import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
 import { YoutubeAuthRepository } from '../repository/oauth/youtubeauth.repo';
 import { LinkedinAuthRepository } from '../repository/oauth/linkedinauth.repo';
-import { FacebookAuthRepository } from '../repository/oauth/facebookauth.repo';
+import { FacebookRepository } from '../repository/facebook.repo';
 import { NavigationService } from './navigation.service';
 import { SocialAccount } from '../model/socialaccount.model';
+import { FacebookPage } from '../model/facebookpage.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocialAuthService {
+
   private auth = getAuth();
 
   private googleProvider = new GoogleAuthProvider();
   private twitterProvider = new TwitterAuthProvider();
 
   private userPersonalAccounts = new Subject<SocialAccount[]>();
+  private userFacebookPages = new Subject<FacebookPage[]>();
+  private userInstagramLinkSuccess = new Subject<boolean>();
 
   private mediumAuthSubject = new Subject<boolean>();
   private twitterAuthSubject = new Subject<boolean>();
@@ -75,12 +83,14 @@ export class SocialAuthService {
     private firestoreRepo: FirestoreRepository,
     private youtubeAuthRepo: YoutubeAuthRepository,
     private linkedinAuthRepo: LinkedinAuthRepository,
-    private facebookAuthRepo: FacebookAuthRepository
+    private facebookRepo: FacebookRepository
   ) {
     /** */
   }
 
   getPersonalAccountsObservable$ = this.userPersonalAccounts.asObservable();
+  getFacebookPagesObservable$ = this.userFacebookPages.asObservable();
+  getInstagramLinkSuccessObservable$ = this.userInstagramLinkSuccess.asObservable();
 
   getMediumAuthObservable$ = this.mediumAuthSubject.asObservable();
   getTwitterAuthObservable$ = this.twitterAuthSubject.asObservable();
@@ -111,6 +121,57 @@ export class SocialAuthService {
       })
     );
 
+  getFacebookPages() {
+    this.firestoreRepo
+      .getDocumentAsUser<SocialAccount>(
+        PERSONAL_ACCTS_DOC,
+        PostingPlatform.FACEBOOK
+      )
+      .pipe(
+        concatMap((facebookAccount: SocialAccount) => 
+          this.facebookRepo.getFacebookPages(
+            facebookAccount.user_id ?? '',
+            facebookAccount.access_token
+          )
+        )
+      ).subscribe({
+        next: (facebookPages) => {
+          console.log("🚀 ~ file: socialauth.service.ts:135 ~ SocialAuthService ~ getFacebookPages ~ facebookPages:", facebookPages)
+          this.userFacebookPages.next(facebookPages);
+        },
+        error: (error) => {
+          console.log("🚀 ~ file: socialauth.service.ts:139 ~ SocialAuthService ~ getFacebookPages ~ error:", error)
+          this.errorSubject.next(error);
+        }
+      });
+  }
+
+  getAssociatedInstagramAccounts(page: FacebookPage) {
+    // TODO error hadling if page does not have instagram account
+    from(this.firestoreRepo.updateCurrentUserCollectionDocument(
+      PERSONAL_ACCTS_DOC,
+      PostingPlatform.FACEBOOK,
+      {
+        [PAGE]: page
+      }
+    )).pipe(
+      concatMap(() => this.facebookRepo.getAssociatedInstagramAccounts(page)),
+      concatMap((instagramAccounts) => {
+        return from(this.firestoreRepo.updateCurrentUserCollectionDocument(
+          PERSONAL_ACCTS_DOC,
+          PostingPlatform.INSTAGRAM,
+          instagramAccounts
+      ))
+    })).subscribe({
+      next: (success) => {
+        this.userInstagramLinkSuccess.next(success);
+      },
+      error: (error) => {
+        this.errorSubject.next(error);
+      }
+    })
+  }
+
   getPersonalAccounts() {
     this.firestoreRepo
       .getUserCollection<SocialAccount>(PERSONAL_ACCTS_DOC)
@@ -120,7 +181,7 @@ export class SocialAuthService {
         },
         error: (error) => {
           this.errorSubject.next(error);
-        }
+        },
       });
   }
 
@@ -161,16 +222,27 @@ export class SocialAuthService {
    * This is not working except in HTTPS published
    */
   signInWithFacebook(authCode: string) {
-    this.facebookAuthRepo
+    this.facebookRepo
       .exchangeAuthCodeForAccessToken(authCode)
       .pipe(
-        concatMap((accessTokenObj: any) =>
+        concatMap((accessTokenObj: { accessToken: string }) =>{
+          console.log(accessTokenObj);
+          return this.facebookRepo.getFacebookUserId(accessTokenObj.accessToken).pipe(
+            map((user_id: string) => {
+              return {
+                [USER_ID]: user_id,
+                [ACCESS_TOKEN]: accessTokenObj.accessToken,
+              };
+            })
+          )}
+        ),
+        concatMap((accessTokenObj: { user_id: string; access_token: string }) =>
           this.firestoreRepo.updateCurrentUserCollectionDocument(
             PERSONAL_ACCTS_DOC,
             PostingPlatform.FACEBOOK,
             {
               [PLATFORM]: PostingPlatform.FACEBOOK,
-              ...accessTokenObj
+              ...accessTokenObj,
             }
           )
         )
@@ -180,10 +252,6 @@ export class SocialAuthService {
           if (result) {
             this.navigationService.navigateToRoot();
             this.facebookAuthSubject.next(true);
-            console.log(
-              '🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result',
-              result
-            );
           } else {
             this.errorSubject.next('LinkedIn Auth Error');
           }
@@ -191,10 +259,6 @@ export class SocialAuthService {
         error: (error) => {
           this.navigationService.navigateToRoot();
           this.errorSubject.next(error);
-          console.log(
-            '🔥 ~ file: socialaccount.service.ts:156 ~ SocialAccountService ~ .subscribe ~ error',
-            error
-          );
         },
       });
   }
@@ -265,7 +329,7 @@ export class SocialAuthService {
           if (currentUser === undefined) {
             throw new Error('No current user');
           }
-          return this.firestoreRepo.getUsersDocument(
+          return this.firestoreRepo.getUserInfoAsDocument(
             USERS_COL,
             currentUser?.uid
           );
@@ -321,7 +385,7 @@ export class SocialAuthService {
             PostingPlatform.LINKEDIN,
             {
               [PLATFORM]: PostingPlatform.LINKEDIN,
-              ...accessTokenObj
+              ...accessTokenObj,
             }
           );
         })
@@ -346,7 +410,7 @@ export class SocialAuthService {
           console.log(
             '🔥 ~ file: socialaccount.service.ts:235 ~ SocialAccountService ~ .subscribe ~ error',
             error
-            );
+          );
           this.navigationService.navigateToRoot();
         },
       });

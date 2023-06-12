@@ -2,7 +2,7 @@ import sys
 import os
 import tweepy
 import appsecrets
-from storage.firebase_storage import firebase_storage_instance, PostingPlatform
+from storage.firebase_storage import firestore_instance, PostingPlatform
 import json
 import ai.gpt as gpt
 import domain.url_shortener as url_shortener
@@ -94,7 +94,7 @@ def post_scheduled_tweet( scheduled_datetime_str ):
             value: with success. this is the post response
             none: with error.
     '''
-    post_params_json = firebase_storage_instance.get_specific_post(
+    post_params_json = firestore_instance.get_specific_post(
         PostingPlatform.TWITTER, 
         scheduled_datetime_str
     )
@@ -113,7 +113,7 @@ def post_scheduled_tweet( scheduled_datetime_str ):
     return update_tweet(tweet)
 
 def post_tweet(is_testmode=False): 
-    return firebase_storage_instance.upload_if_ready(
+    return firestore_instance.upload_if_ready(
         PostingPlatform.TWITTER, 
         post_scheduled_tweet,
         is_test = is_testmode
@@ -124,7 +124,7 @@ def schedule_video_tweet( tweet, video_remote_url ):
         payload = dict()
         payload['tweet'] = tweet
         payload['media_url'] = video_remote_url
-        result = firebase_storage_instance.upload_scheduled_post(
+        result = firestore_instance.upload_scheduled_post(
             PostingPlatform.TWITTER, 
             payload
         )
@@ -139,7 +139,7 @@ def schedule_tweet( tweet ):
         payload = dict()
         payload['tweet'] = tweet
 
-        result = firebase_storage_instance.upload_scheduled_post(
+        result = firestore_instance.upload_scheduled_post(
             PostingPlatform.TWITTER, 
             payload
         )

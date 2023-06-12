@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import sys
 import os
 import ai.gpt as gpt
-import storage.dropbox_storage as dropbox_storage
 from storage.dropbox_storage import DB_FOLDER_READY, DB_FOLDER_SCHEDULED
 import content.ig_content_repo as ig_content_repo
 import content.fb_content_repo as fb_content_repo

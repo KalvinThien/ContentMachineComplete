@@ -35,6 +35,9 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService } from 'primeng/api';
 import { MessageService } from 'primeng/api';
 import { AccordionModule } from 'primeng/accordion';
+import { CreateContentComponent } from './views/createcontent/createcontent.component';
+import { StepsModule } from 'primeng/steps';
+import { ListboxModule } from 'primeng/listbox';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -64,8 +67,11 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     AccounthubComponent,
     LinkedinRedirectComponent,
     FacebookRedirectComponent,
+    CreateContentComponent,
   ],
   imports: [
+    ListboxModule,
+    StepsModule,
     AccordionModule,
     ToastModule,
     ConfirmDialogModule,

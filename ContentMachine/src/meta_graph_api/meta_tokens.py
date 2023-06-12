@@ -4,7 +4,7 @@ from domain.endpoint_definitions import make_api_call
 import requests
 import appsecrets
 import json
-from storage.firebase_storage import firebase_storage_instance, PostingPlatform
+from storage.firebase_storage import firestore_instance, PostingPlatform
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +19,7 @@ def create_fb_credentials_object():
 	"""
 
 	creds = dict() # dictionary to hold everything
-	creds['access_token'] = firebase_storage_instance.get_meta_short_lived_token(PostingPlatform.FACEBOOK) # access token for use with all api calls
+	creds['access_token'] = firestore_instance.get_meta_short_lived_token(PostingPlatform.FACEBOOK) # access token for use with all api calls
 	creds['graph_domain'] = 'https://graph.facebook.com/' # base domain for api calls
 	creds['graph_version'] = 'v15.0' # version of the api we are hitting
 	creds['endpoint_base'] = creds['graph_domain'] + creds['graph_version'] + '/' # base endpoint with domain and version
@@ -27,7 +27,7 @@ def create_fb_credentials_object():
 
 	return creds	
 
-def create_personal_credentials_object():
+def create_core_request_object():
 	""" 
         Get creds required for use in the applications
         
@@ -35,18 +35,18 @@ def create_personal_credentials_object():
             dictonary: credentials needed globally
 	"""
 	creds = dict() # dictionary to hold everything
-	creds['access_token'] = firebase_storage_instance.get_meta_short_lived_token(PostingPlatform.INSTAGRAM) # access token for use with all api calls
+	# creds['access_token'] = firestore_instance.get_meta_short_lived_token(PostingPlatform.INSTAGRAM) # access token for use with all api calls
 	creds['client_id'] = appsecrets.META_APP_ID
 	creds['client_secret'] = appsecrets.META_APP_SECRET
 	creds['graph_domain'] = 'https://graph.facebook.com/' # base domain for api calls
 	creds['graph_version'] = 'v15.0' # version of the api we are hitting
 	creds['endpoint_base'] = creds['graph_domain'] + creds['graph_version'] + '/' # base endpoint with domain and version
-	creds['instagram_account_id'] = appsecrets.INSTAGRAM_GRAPH_API_PAGE_ID # users instagram account id
+	# creds['instagram_account_id'] = appsecrets.INSTAGRAM_GRAPH_API_PAGE_ID # users instagram account id
 	creds['debug'] = 'no'
 
 	return creds
 
-def fetch_personal_access_token() :
+def fetch_personal_access_token( user_id ) :
     """ 
         Get long lived access token
         
@@ -55,32 +55,37 @@ def fetch_personal_access_token() :
         @returns:
             object: data from the endpoint
     """
-    params = create_personal_credentials_object()
-    cachedToken = firebase_storage_instance.get_meta_bearer_token(PostingPlatform.INSTAGRAM)
-
-    if (cachedToken != ''):
-        params['access_token'] = cachedToken
-        print(f"IG found cached token!")
-        return params
-    else:
-        token_params = dict() # parameter to send to the endpoint
-        token_params['grant_type'] = 'fb_exchange_token' # tell facebook we want to exchange token
-        token_params['client_id'] = params['client_id'] # client id from facebook app
-        token_params['client_secret'] = params['client_secret'] # client secret from facebook app
-        token_params['fb_exchange_token'] = params['access_token'] # access token to get exchange for a long lived token
-
-        token_url = params['endpoint_base'] + 'oauth/access_token' # endpoint url
-        token_response = make_api_call( url=token_url, req_params=token_params, type=params['debug'] ) # make the api call
-        
-        pretty_dump = json.dumps( token_response['json_data'], indent = 4 ) 
-        print(pretty_dump)
-
-        access_token = token_response['json_data']['access_token']
-        firebase_storage_instance.store_meta_bearer_token(PostingPlatform.INSTAGRAM, access_token)
-
-        params['access_token'] = access_token
-
+    params = create_core_request_object()
+    
+    params['instagram_account_id'] = firestore_instance.get_ig_page_id_from_fb_page_id(user_id) 
+    params['accessToken'] = firestore_instance.get_client_access_token(user_id, PostingPlatform.INSTAGRAM)
     return params
+
+    # cachedToken = firestore_instance.get_meta_bearer_token(PostingPlatform.INSTAGRAM)
+
+    # if (cachedToken != ''):
+    #     params['access_token'] = cachedToken
+    #     print(f"IG found cached token!")
+    #     return params
+    # else:
+    #     token_params = dict() # parameter to send to the endpoint
+    #     token_params['grant_type'] = 'fb_exchange_token' # tell facebook we want to exchange token
+    #     token_params['client_id'] = params['client_id'] # client id from facebook app
+    #     token_params['client_secret'] = params['client_secret'] # client secret from facebook app
+    #     token_params['fb_exchange_token'] = params['access_token'] # access token to get exchange for a long lived token
+
+    #     token_url = params['endpoint_base'] + 'oauth/access_token' # endpoint url
+    #     token_response = make_api_call( url=token_url, req_params=token_params, type=params['debug'] ) # make the api call
+        
+    #     pretty_dump = json.dumps( token_response['json_data'], indent = 4 ) 
+    #     print(pretty_dump)
+
+    #     access_token = token_response['json_data']['access_token']
+    #     firestore_instance.store_meta_bearer_token(PostingPlatform.INSTAGRAM, access_token)
+
+    #     params['access_token'] = access_token
+
+    # return params
 
 def make_page_access_token_request():
     '''
@@ -110,7 +115,7 @@ def make_page_access_token_request():
     print(" 🛑 ------------------------------------------------------------------------------- 🛑")
     token = response['json_data']['access_token']
     params['page_access_token'] = refresh_fb_page_access_token(token)
-    firebase_storage_instance.store_meta_bearer_token(PostingPlatform.FACEBOOK, params['page_access_token'])
+    firestore_instance.store_meta_bearer_token(PostingPlatform.FACEBOOK, params['page_access_token'])
     
     return params
 
@@ -155,7 +160,7 @@ def refresh_fb_page_access_token( existing_access_token ):
         new_access_token = data['access_token']
         
         # Store the new
-        firebase_storage_instance.store_meta_bearer_token(PostingPlatform.FACEBOOK, new_access_token)
+        firestore_instance.store_meta_bearer_token(PostingPlatform.FACEBOOK, new_access_token)
 
         return new_access_token
     else:
@@ -169,7 +174,7 @@ def fetch_fb_page_access_token():
         @returns:
             dict: Complete params including the access token for future requests    
     '''
-    cachedToken = firebase_storage_instance.get_meta_bearer_token(PostingPlatform.FACEBOOK)
+    cachedToken = firestore_instance.get_meta_bearer_token(PostingPlatform.FACEBOOK)
 
     if (cachedToken != ''):
         params = dict()

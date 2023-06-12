@@ -1,0 +1,47 @@
+<div *ngIf="currentContentStage == 'init'">
+  <ng-template pTemplate="header">
+    <h3>Select your content source</h3>
+  </ng-template>
+  <div style="display: flex; flex-direction: row;">
+    <p-card class="split-card" header="Text Prompt">
+      <p class="m-0">Just type in a topic or idea and we will build on it. Making sure each post is relevant to your
+        input.</p>
+      <p-button label="Create" styleClass="p-button-rounded" (click)="generateWithText()"></p-button>
+    </p-card>
+    <p-card class="split-card" header="Video Upload">
+      <p class="m-0">Just type in a topic or idea and we will build on it. Making sure each post is relevant to your
+        input.</p>
+      <p-button label="Create" styleClass="p-button-rounded" (click)="generateWithVideo()"></p-button>
+    </p-card>
+    <p-card class="split-card" header="Youtube Link">
+      <p class="m-0">Just type in a topic or idea and we will build on it. Making sure each post is relevant to your
+        input.</p>
+      <p-button label="Create" styleClass="p-button-rounded" (click)="generateWithYoutube()"></p-button>
+    </p-card>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button icon="pi pi-cloud-upload" (click)="onAutoGenerate()" label="Generate one month of content for me"
+      styleClass="p-button-rounded p-button-outlined "></p-button>
+  </ng-template>
+</div>
+
+<div *ngIf="currentContentStage == 'text'">
+  <ng-template pTemplate="header">
+    <h3>Enter your topic and how often you would like it to post</h3>
+  </ng-template>
+  <div style="display: flex; flex-direction: row;">
+    
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button icon="pi pi-cloud-upload" (click)="onAutoGenerateTopic()" label="Generate a topic for me"
+      styleClass="p-button-rounded p-button-outlined "></p-button>
+  </ng-template>
+</div>
+
+<div *ngIf="currentContentStage == 'video'">
+
+</div>
+
+<div *ngIf="currentContentStage == 'youtube_link'">
+
+</div>
