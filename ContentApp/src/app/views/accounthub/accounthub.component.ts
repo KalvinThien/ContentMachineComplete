@@ -40,7 +40,7 @@ export class AccounthubComponent implements OnInit, OnChanges {
   ];
   facebookAuthMenuItemIndex = 0;
   userFacebookPages: FacebookPage[] = [];
-  userSelectedFacebookPage: any;
+  userSelectedFacebookPage: FacebookPage | undefined = undefined;
   
   constructor(
     private socialAuthService: SocialAuthService,
@@ -62,6 +62,14 @@ export class AccounthubComponent implements OnInit, OnChanges {
     }
 
     private setupObservers() {
+      this.socialAuthService.getInstagramLinkSuccessObservable$.subscribe({
+        next: (success) => {
+          this.facebookAuthMenuItemIndex = 2;
+        },
+        error: (err) => {
+          this.messageService.add({severity:'error', summary:'Error', detail: err});
+        }
+      })
       this.socialAuthService.getFacebookPagesObservable$.subscribe({
         next: (pages) => {
           this.userFacebookPages = pages;
@@ -74,7 +82,7 @@ export class AccounthubComponent implements OnInit, OnChanges {
           this.personalAccounts.forEach((account) => {
             // we should only label as connected if a FB page and IG is connected
             if (account.platform === PostingPlatform.FACEBOOK) {
-              this.facebookConnected = true;
+              // this.facebookConnected = true;
             } else if (account.platform === PostingPlatform.LINKEDIN) {
               this.linkedinConnected = true;
             } else if (account.platform === PostingPlatform.MEDIUM) {
@@ -143,21 +151,12 @@ export class AccounthubComponent implements OnInit, OnChanges {
       this.socialAuthService.signInWithMedium(this.mediumIntegKey);
     }
 
-    onFacebookAuthIndexChange(currIndex: number) {
-      let nextIndex = currIndex;
-      if (currIndex < 2) {
-        nextIndex = currIndex + 1;
-      }
-      // take action
-      if (this.facebookAuthMenuItemIndex === 0) {
-        // this.socialAuthService.getFacebookPages();
-      }
-      // update index after action
-      this.facebookAuthMenuItemIndex = nextIndex;
-    }
-
     onFacebookPageSelected() {
-      throw new Error('Method not implemented.');
+      if (this.userSelectedFacebookPage !== undefined) {
+        this.socialAuthService.getAssociatedInstagramAccounts(this.userSelectedFacebookPage);
+      } else {
+        this.messageService.add({ severity: 'info', summary: 'Please select a page before continuing', detail: `Please select a page.` });
+      }
     }
 }
 

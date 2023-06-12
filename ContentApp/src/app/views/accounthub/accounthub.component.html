@@ -37,8 +37,7 @@
     <p-steps 
       [model]="faceebookAuthMenuItems" 
       [readonly]="true" 
-      [activeIndex]="facebookAuthMenuItemIndex"
-      (activeIndexChange)="onFacebookAuthIndexChange(facebookAuthMenuItemIndex)">
+      [activeIndex]="facebookAuthMenuItemIndex">
     </p-steps>
       <!-- First step conenct -->
       <div class="container" *ngIf="facebookAuthMenuItemIndex === 0">
@@ -62,17 +61,28 @@
       </div>
       <!-- Second Step. Facebook Page -->
       <div class="container" *ngIf="facebookAuthMenuItemIndex == 1">
-        <p>Great. We have your facebook pages for you.  Let's start by picking just one.</p>
-        <p-listbox [filter]="true" [options]="userFacebookPages" [(ngModel)]="userSelectedFacebookPage" optionLabel="page" [style]="{'width':'100%'}"></p-listbox>
-        <p-footer>
-          <button pButton type="button" label="Continue" icon="pi pi-plus" styleClass="p-button-success"
-            [disabled]="userSelectedFacebookPage == undefined" (click)="onFacebookPageSelected()">
-            <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" /></button>
-        </p-footer>
+        <div class="column">
+          <p>Great. We have your facebook pages for you.  Let's start by picking just one.</p>
+          <p>If you would like to connect an Instagram account as well it is important that it is connected to the Facebook page you will select here.</p>
+          <p-listbox [options]="userFacebookPages" [(ngModel)]="userSelectedFacebookPage" optionLabel="page" [style]="{'width':'100%'}">
+            <ng-template let-page pTemplate="item">
+              <div class="flex align-items-center gap-2">
+                  <h4>{{ page.name }}</h4>
+              </div>
+          </ng-template>
+          </p-listbox>
+          <p-footer>
+            <button pButton type="button" label="Continue" icon="pi pi-plus" styleClass="p-button-success"
+              [disabled]="userSelectedFacebookPage == undefined" (click)="onFacebookPageSelected()">
+              <p-progressSpinner *ngIf="isLoading" alt="loading" styleClass="w-2rem h-2rem" /></button>
+          </p-footer>
+        </div>
       </div>
       <!-- Third Step. Instagram Account -->
-      <div>
-
+        <div class="container" *ngIf="facebookAuthMenuItemIndex == 1">
+          <div class="column">
+            <p>Congrats your facebook is fully authenticated.  Go ahead and close this dialog and proceed with setting your content on autopilot.</p>
+          </div>
       </div>
   </p-tabPanel>
   <p-tabPanel header="medium">

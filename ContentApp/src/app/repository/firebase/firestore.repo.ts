@@ -36,6 +36,7 @@ export const LAST_LOGIN_AT = 'last_login_at';
 export const CREATION_TIME = 'creation_time';
 export const REFRESH_TOKEN = 'refresh_token';
 export const SCOPE = 'scopes';
+export const PAGE = 'page';
 
 @Injectable({
   providedIn: 'root',
@@ -48,25 +49,26 @@ export class FirestoreRepository {
   ) {}
 
   getDocumentAsUser<T>(collectionPath: string, documentKey: string): Observable<T> {
-    return this.fireAuth.getUserAuthObservable().pipe(
-      concatMap((user: any) => {
-        const collectionRef =  collection(this.firestore, USERS_COL, user.uid, collectionPath);
-        const docRef = doc(collectionRef, documentKey);
+    const user = this.fireAuth.currentSessionUser;
+    if (!user) {
+      return of({} as T);
+    }
+    
+    const collectionRef =  collection(this.firestore, USERS_COL, user.uid, collectionPath);
+    const docRef = doc(collectionRef, documentKey);
 
-        return from(getDoc(docRef)).pipe(  
-          tap((data) => {
-            if (!environment.production) {
-              console.groupCollapsed(
-                `❤️‍🔥 Firestore Streaming [${docRef.path}] [getDocumentAsUser] [${user.uid}]`
-              );
-              console.log(data);
-              console.groupEnd();
-            }
-          }),
-          filter((data) => !!data),
-          map((data) => data.data() as T)
-        );
-      })
+    return from(getDoc(docRef)).pipe(  
+      tap((data) => {
+        if (!environment.production) {
+          console.groupCollapsed(
+            `❤️‍🔥 Firestore Streaming [${docRef.path}] [getDocumentAsUser] [${user.uid}]`
+          );
+          console.log(data);
+          console.groupEnd();
+        }
+      }),
+      filter((data) => !!data),
+      map((data) => data.data() as T)
     );
   }
 

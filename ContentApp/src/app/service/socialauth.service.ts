@@ -20,6 +20,7 @@ import {
   DISPLAY_NAME,
   FirestoreRepository,
   HANDLE,
+  PAGE,
   PLATFORM,
   SCOPE,
   USER_ID,
@@ -49,6 +50,7 @@ import { FacebookPage } from '../model/facebookpage.model';
   providedIn: 'root',
 })
 export class SocialAuthService {
+
   private auth = getAuth();
 
   private googleProvider = new GoogleAuthProvider();
@@ -56,6 +58,7 @@ export class SocialAuthService {
 
   private userPersonalAccounts = new Subject<SocialAccount[]>();
   private userFacebookPages = new Subject<FacebookPage[]>();
+  private userInstagramLinkSuccess = new Subject<boolean>();
 
   private mediumAuthSubject = new Subject<boolean>();
   private twitterAuthSubject = new Subject<boolean>();
@@ -87,6 +90,7 @@ export class SocialAuthService {
 
   getPersonalAccountsObservable$ = this.userPersonalAccounts.asObservable();
   getFacebookPagesObservable$ = this.userFacebookPages.asObservable();
+  getInstagramLinkSuccessObservable$ = this.userInstagramLinkSuccess.asObservable();
 
   getMediumAuthObservable$ = this.mediumAuthSubject.asObservable();
   getTwitterAuthObservable$ = this.twitterAuthSubject.asObservable();
@@ -124,7 +128,7 @@ export class SocialAuthService {
         PostingPlatform.FACEBOOK
       )
       .pipe(
-        concatMap((facebookAccount: SocialAccount) =>
+        concatMap((facebookAccount: SocialAccount) => 
           this.facebookRepo.getFacebookPages(
             facebookAccount.user_id ?? '',
             facebookAccount.access_token
@@ -132,12 +136,40 @@ export class SocialAuthService {
         )
       ).subscribe({
         next: (facebookPages) => {
+          console.log("🚀 ~ file: socialauth.service.ts:135 ~ SocialAuthService ~ getFacebookPages ~ facebookPages:", facebookPages)
           this.userFacebookPages.next(facebookPages);
         },
         error: (error) => {
+          console.log("🚀 ~ file: socialauth.service.ts:139 ~ SocialAuthService ~ getFacebookPages ~ error:", error)
           this.errorSubject.next(error);
         }
       });
+  }
+
+  getAssociatedInstagramAccounts(page: FacebookPage) {
+    // TODO error hadling if page does not have instagram account
+    from(this.firestoreRepo.updateCurrentUserCollectionDocument(
+      PERSONAL_ACCTS_DOC,
+      PostingPlatform.FACEBOOK,
+      {
+        [PAGE]: page
+      }
+    )).pipe(
+      concatMap(() => this.facebookRepo.getAssociatedInstagramAccounts(page)),
+      concatMap((instagramAccounts) => {
+        return from(this.firestoreRepo.updateCurrentUserCollectionDocument(
+          PERSONAL_ACCTS_DOC,
+          PostingPlatform.INSTAGRAM,
+          instagramAccounts
+      ))
+    })).subscribe({
+      next: (success) => {
+        this.userInstagramLinkSuccess.next(success);
+      },
+      error: (error) => {
+        this.errorSubject.next(error);
+      }
+    })
   }
 
   getPersonalAccounts() {
@@ -197,7 +229,6 @@ export class SocialAuthService {
           console.log(accessTokenObj);
           return this.facebookRepo.getFacebookUserId(accessTokenObj.accessToken).pipe(
             map((user_id: string) => {
-              console.log("🚀 ~ file: socialauth.service.ts:200 ~ SocialAuthService ~ map ~ user_id:", user_id)
               return {
                 [USER_ID]: user_id,
                 [ACCESS_TOKEN]: accessTokenObj.accessToken,
@@ -221,10 +252,6 @@ export class SocialAuthService {
           if (result) {
             this.navigationService.navigateToRoot();
             this.facebookAuthSubject.next(true);
-            console.log(
-              '🚀 ~ file: socialaccount.service.ts:233 ~ SocialAccountService ~ .subscribe ~ result',
-              result
-            );
           } else {
             this.errorSubject.next('LinkedIn Auth Error');
           }
@@ -232,10 +259,6 @@ export class SocialAuthService {
         error: (error) => {
           this.navigationService.navigateToRoot();
           this.errorSubject.next(error);
-          console.log(
-            '🔥 ~ file: socialaccount.service.ts:156 ~ SocialAccountService ~ .subscribe ~ error',
-            error
-          );
         },
       });
   }

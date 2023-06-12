@@ -7,15 +7,27 @@ import { FacebookPage } from "../model/facebookpage.model";
   providedIn: 'root',
 })
 export class FacebookRepository {
-  private apiUrl = 'https://graph.facebook.com/v15.0';
 
+  private apiUrl = 'https://graph.facebook.com/v15.0';
+  
   constructor() {
     /** */
   }
 
+  getAssociatedInstagramAccounts(page: FacebookPage) {
+    const url = `${this.apiUrl}/${page.id}`;
+    return from(axios.get(url, {
+      params: {
+        fields: 'instagram_business_account',
+        access_token: page.access_token
+      }
+    })).pipe(
+      map((response: any) => response.data)
+    );
+  }
+
   getFacebookUserId(userAccessToken: string): Observable<string> {
     const url = `${this.apiUrl}/me`;
-
     return from(axios.get(url, {
       params: {
         fields: 'id',
@@ -55,7 +67,7 @@ export class FacebookRepository {
         access_token: userAccessToken
       }
     })).pipe(
-      map((response: { data: FacebookPage[] }) => response.data)
+      map((response: any) => response.data.data)
     );
   }
 }
