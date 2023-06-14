@@ -106,8 +106,10 @@ def schedule_medium_article(blog, image_query='technology'):
             payload
         )
         print(f'📦 MD result {result}')
+        return result
     except Exception as e:
-        print(f'🔥 MD: Something went wrong parsing blog {e}')        
+        print(f'🔥 MD: Something went wrong parsing blog {e}')  
+        return ''      
 
 #construct and save address of uploaded blog
                 # if (result):

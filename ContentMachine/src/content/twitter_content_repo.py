@@ -144,6 +144,7 @@ def schedule_tweet( tweet ):
             payload
         )
         print(f'⏰ Tweet scheduled!\n{result}') 
+        return result
     else:
         print('🔥 Error scheduling TW')
         return ''    

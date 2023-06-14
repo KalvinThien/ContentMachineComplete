@@ -3,5 +3,12 @@
     "activityBar.background": "#900404",
     "titleBar.activeBackground": "#dc0a0a",
     "titleBar.activeForeground": "#F4FBF8"
-  }
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "python.formatting.provider": "autopep8"
 }

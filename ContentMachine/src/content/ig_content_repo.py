@@ -201,7 +201,9 @@ def schedule_ig_image_post( user_id, caption, image_query ):
     params['caption'] = caption
         
     remote_media_obj = create_ig_media_object( params, False ) 
-    firestore_instance.upload_scheduled_post(user_id, PostingPlatform.INSTAGRAM, remote_media_obj)
+    result = firestore_instance.upload_scheduled_post(user_id, PostingPlatform.INSTAGRAM, remote_media_obj)
+    print('📦 IG upload scheduled post result' + str(result))
+    return result
 
 def monitor_ig_upload_status( ig_upload_response, post_params, publish_func ):	
     upload_container_id = ig_upload_response['json_data']['id'] # id of the media object that was created

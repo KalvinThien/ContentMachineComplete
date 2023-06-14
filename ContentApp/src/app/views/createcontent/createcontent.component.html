@@ -29,8 +29,26 @@
   <ng-template pTemplate="header">
     <h3>Enter your topic and how often you would like it to post</h3>
   </ng-template>
-  <div style="display: flex; flex-direction: row;">
-    
+  <div class="flex flex-column gap-2">
+    <label htmlFor="prompt">Input Prompt</label>
+    <textarea rows="5" cols="30" pInputTextarea [autoResize]="true" [(ngModel)]="inputPrompt"></textarea>
+    <small id="prompt-help">Enter your prompt to create the content.  The more detail you provide the better the content will be and unique across multiple posts.</small>
+    <br/>
+    <label htmlFor="frequency">Frequency</label>
+    <p-listbox [options]="frequencyOptions" [(ngModel)]="selectedFrequency" optionLabel="label" optionValue="value" placeholder="Select how often we should post" [style]="{'width':'100%'}">
+      <ng-template let-option pTemplate="item">
+        <div class="flex align-items-left gap-2">
+          <b>{{ option.title }}</b>
+          <p>{{ option.description }}</p>
+        </div>
+      </ng-template>
+    </p-listbox>
+    <small id="frequency-help">Select how often you would like the content to be posted.</small>
+    <p-footer>
+      <button pButton type="button" label="Create!" icon="pi pi-plus" styleClass="p-button-success"
+        [disabled]="selectedFrequency == undefined" (click)="onCreateSelected(selectedFrequency)">
+      </button>
+    </p-footer>
   </div>
   <ng-template pTemplate="footer">
     <p-button icon="pi pi-cloud-upload" (click)="onAutoGenerateTopic()" label="Generate a topic for me"

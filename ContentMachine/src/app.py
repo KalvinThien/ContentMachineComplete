@@ -58,8 +58,9 @@ def text_to_content():
     userUuid = data['userUuid']
     content = data['content']
     image = data['image']
+    frequency = data['frequency']
     
-    bool_result = text_machine.process_text(userUuid, content, image)
+    bool_result = text_machine.run_text_machine(userUuid, content, image, frequency)
 
     return jsonify(result=bool_result)
 
