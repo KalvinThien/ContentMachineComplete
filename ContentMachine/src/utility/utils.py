@@ -4,6 +4,10 @@ import json
 import uuid
 import random
 
+def randomize_array(array):
+    randomized_array = random.sample(array, len(array))
+    return randomized_array
+
 def quick_uuid():
     """Generates a short UUID with 6 characters."""
     uid = uuid.uuid4()

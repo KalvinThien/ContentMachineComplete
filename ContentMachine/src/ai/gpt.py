@@ -126,6 +126,7 @@ def generate_text_prompt(
     return resultsArray
 
 def generate_image_prompt(
+        user_id,
         prompt_source, 
         image_query,
         post_num, 
@@ -136,7 +137,7 @@ def generate_image_prompt(
         print(f'Processing #{num + 1} of {prompt_source}')
         gpt_text = get_gpt_generated_text(prompt_source)
 
-        resultsArray.append(upload_func(gpt_text, image_query))
+        resultsArray.append(upload_func(user_id, gpt_text, image_query))
     return resultsArray
         
 

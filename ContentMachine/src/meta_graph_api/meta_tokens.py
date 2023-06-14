@@ -36,8 +36,8 @@ def create_core_request_object():
 	"""
 	creds = dict() # dictionary to hold everything
 	# creds['access_token'] = firestore_instance.get_meta_short_lived_token(PostingPlatform.INSTAGRAM) # access token for use with all api calls
-	creds['client_id'] = appsecrets.META_APP_ID
-	creds['client_secret'] = appsecrets.META_APP_SECRET
+	creds['client_id'] = appsecrets.FACEBOOK_CLIENT_ID  
+	creds['client_secret'] = appsecrets.FACEBOOK_CLIENT_SECRET
 	creds['graph_domain'] = 'https://graph.facebook.com/' # base domain for api calls
 	creds['graph_version'] = 'v15.0' # version of the api we are hitting
 	creds['endpoint_base'] = creds['graph_domain'] + creds['graph_version'] + '/' # base endpoint with domain and version
@@ -130,7 +130,7 @@ def refresh_fb_page_access_token( existing_access_token ):
             str: the new long-lived Facebook Page Access Token. Empty strings if erros arise
     '''
     # Check the state of the existing access token
-    debug_token_url = f'https://graph.facebook.com/v15.0/debug_token?input_token={existing_access_token}&access_token={appsecrets.META_APP_ID}|{appsecrets.META_APP_SECRET}'
+    debug_token_url = f'https://graph.facebook.com/v15.0/debug_token?input_token={existing_access_token}&access_token={appsecrets.FACEBOOK_CLIENT_ID}|{appsecrets.FACEBOOK_CLIENT_SECRET}'
 
     print(f'FB checking the validity of cached token')
     debug_token_response = requests.get(debug_token_url)
@@ -152,7 +152,7 @@ def refresh_fb_page_access_token( existing_access_token ):
 
     # Get the new long-lived access token
     print('FB making request to update our existing long lived token')
-    exchange_token_url = f'https://graph.facebook.com/v15.0/oauth/access_token?grant_type=fb_exchange_token&client_id={appsecrets.META_APP_ID}&client_secret={appsecrets.META_APP_SECRET}&fb_exchange_token={existing_access_token}'
+    exchange_token_url = f'https://graph.facebook.com/v15.0/oauth/access_token?grant_type=fb_exchange_token&client_id={appsecrets.FACEBOOK_CLIENT_ID}&client_secret={appsecrets.FACEBOOK_CLIENT_SECRET}&fb_exchange_token={existing_access_token}'
     exchange_token_response = requests.get(exchange_token_url)
 
     if exchange_token_response.status_code == 200:

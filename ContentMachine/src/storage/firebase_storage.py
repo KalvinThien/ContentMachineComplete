@@ -64,6 +64,5 @@ def downoad_input_prompts(download_folder_name, destination_folder_name):
     for blob in blobs:
         # Process each file here
         # Example: Print the name of the file
-        print("File Name:", blob.name)
         download_blob(blob.name, f"{destination_folder_name}/{blob.name}")
     return True    

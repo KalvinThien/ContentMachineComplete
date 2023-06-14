@@ -35,6 +35,11 @@
   <p-dropdown [options]="frequencyOptions" [(ngModel)]="selectedFrequency" optionLabel="label" optionValue="value"
     placeholder="Select how often we should post" [style]="{'width':'100%'}" [virtualScroll]="true"
     [virtualScrollItemSize]="frequencyOptions.length">
+    <ng-template pTemplate="selectedItem">
+      <div class="flex align-items-center gap-2" *ngIf="selectedFrequency">
+        <p>{{ selectedFrequency.value }}</p>
+      </div>
+    </ng-template>
     <ng-template let-option pTemplate="item">
       <div class="flex align-items-left gap-2">
         <b>{{ option.title }}</b>

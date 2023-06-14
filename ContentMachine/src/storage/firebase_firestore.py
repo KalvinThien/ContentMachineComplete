@@ -20,26 +20,28 @@ class PostingPlatform(Enum):
     TIKTOK = 'tiktok'
     LINKEDIN = 'linkedin'
 
-class FirebaseStorage():
-    # Constants
+class FirebaseFirestore():
+    # Initializations    
+    firebase = pyrebase.initialize_app(appsecrets.FIREBASE_CONFIG)
+    # Deprecated Constants
     TOKEN_COLLECTION = "tokens"
     META_LF_TOKEN_COLLECTION = "meta_long_form_tokens" 
     META_SF_TOKEN_COLLECTION = "meta_short_form_one_hour_tokens"
     DROPBOX_ACCESS_TOKEN = "dropbox_access_token"
+    # deprecated Realtime Database
+    firebaseRealtimeDatabase = firebase.database()
 
     POSTS_COLLECTION = "posts"
     POSTS_COLLECTION_APPEND_PATH = "_posts"
-
+    
     BLOGS_COLLECTION = "posted_blogs" 
 
-    # Initializations    
-    firebase = pyrebase.initialize_app(appsecrets.FIREBASE_CONFIG)
-    firestore = firebase.database()
+    # deprecated above
     storage = firebase.storage()
 
     @classmethod
     def get_complete_access_token( self, access_token_type ):
-        result = self.firestore.child(self.TOKEN_COLLECTION).child(access_token_type).get()
+        result = self.firebaseRealtimeDatabase.child(self.TOKEN_COLLECTION).child(access_token_type).get()
         if (result is not None):
             return result.val()
         else:
@@ -47,14 +49,14 @@ class FirebaseStorage():
 
     @classmethod
     def put_complete_access_token( self, access_token_type, token ):
-        result = self.firestore.child(self.TOKEN_COLLECTION).update({
+        result = self.firebaseRealtimeDatabase.child(self.TOKEN_COLLECTION).update({
             access_token_type: token
         })
         return result
 
     @classmethod
     def get_meta_short_lived_token(self, platform):
-        results = self.firestore.child(self.TOKEN_COLLECTION).child(self.META_SF_TOKEN_COLLECTION).get()
+        results = self.firebaseRealtimeDatabase.child(self.TOKEN_COLLECTION).child(self.META_SF_TOKEN_COLLECTION).get()
         if (results.each() is not None):
             for result in results.each():
                 if (result.key() == platform.value): return result.val()
@@ -62,14 +64,14 @@ class FirebaseStorage():
 
     @classmethod
     def store_meta_bearer_token(self, platform, token):
-        result = self.firestore.child(self.TOKEN_COLLECTION).child(self.META_LF_TOKEN_COLLECTION).update({
+        result = self.firebaseRealtimeDatabase.child(self.TOKEN_COLLECTION).child(self.META_LF_TOKEN_COLLECTION).update({
             platform.value: token
         })
         return result
 
     @classmethod
     def get_meta_bearer_token(self, platform):
-        results = self.firestore.child(self.TOKEN_COLLECTION).child(self.META_LF_TOKEN_COLLECTION).get()
+        results = self.firebaseRealtimeDatabase.child(self.TOKEN_COLLECTION).child(self.META_LF_TOKEN_COLLECTION).get()
         if (results.each() is not None):
             for result in results.each():
                 if (result.key() == platform.value): return result.val()
@@ -94,7 +96,7 @@ class FirebaseStorage():
     def get_earliest_scheduled_datetime( self, platform ):
         scheduled_posts_path = platform.value + self.POSTS_COLLECTION_APPEND_PATH
 
-        collection = self.firestore.child(scheduled_posts_path).get().each()
+        collection = self.firebaseRealtimeDatabase.child(scheduled_posts_path).get().each()
         if (collection is None):
             print(f'{platform.value} earliest scheduled datetime not found')
             return ''
@@ -114,7 +116,7 @@ class FirebaseStorage():
     def get_latest_scheduled_datetime( self, user_id, platform ):
         scheduled_posts_path = platform.value + self.POSTS_COLLECTION_APPEND_PATH
 
-        collection = self.firestore.child(user_id).child(scheduled_posts_path).get().each()
+        collection = self.firebaseRealtimeDatabase.child(user_id).child(scheduled_posts_path).get().each()
 
         if (collection is None):
             return scheduler.get_best_posting_time(platform)
@@ -142,8 +144,8 @@ class FirebaseStorage():
             Returns:
                 string. JSON string translated from the specific document fetched from firebase
         '''
-        specific_collection = f'{platform.value}_{self.POSTS_COLLECTION}'
-        result = self.firestore.child(specific_collection).get()
+        specific_collection = f'{platform.value}{self.POSTS_COLLECTION_APPEND_PATH}'
+        result = self.firebaseRealtimeDatabase.child(specific_collection).get()
 
         if result.each() is None:
             return "No document found with the specified property value."
@@ -162,8 +164,8 @@ class FirebaseStorage():
         else:
             future_publish_date = scheduler.get_best_posting_time(platform, last_posted_time)
 
-        specific_collection = platform.value + "_" + self.POSTS_COLLECTION
-        result = self.firestore.child(user_id).child(specific_collection).update({
+        specific_collection = platform.value + self.POSTS_COLLECTION_APPEND_PATH
+        result = self.firebaseRealtimeDatabase.child(user_id).child(specific_collection).update({
             future_publish_date: payload
         })
         return result
@@ -171,7 +173,7 @@ class FirebaseStorage():
     @classmethod
     def delete_post( self, platform, datetime_key ):
         scheduled_posts_path = platform.value + self.POSTS_COLLECTION_APPEND_PATH
-        result = self.firestore.child(scheduled_posts_path).child(datetime_key).remove()
+        result = self.firebaseRealtimeDatabase.child(scheduled_posts_path).child(datetime_key).remove()
         print(f'{platform.value} firebase deleting @ key {datetime_key}')
         return result
     
@@ -198,4 +200,4 @@ class FirebaseStorage():
             return f'{platform.value} time not within posting window' 
 
 #static instances
-firestore_instance = FirebaseStorage()
+firestore_instance = FirebaseFirestore()

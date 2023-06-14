@@ -72,14 +72,13 @@ def text_to_content():
         return jsonify(result=False)
     else:
         print('🔻 downloading prompts')
-        value = firebase_storage.downoad_input_prompts('input_prompts', os.path.join('src', 'input_prompts'))
-        print("🚀 ~ file: app.py:67 ~ value:", value)
+        firebase_storage.downoad_input_prompts('input_prompts', os.path.join('src', 'input_prompts'))
         print('🔺 downloaded prompts')
 
     
-    bool_result = text_machine.run_text_machine(userUuid, content, image, frequency)
+    returnResult = text_machine.run_text_machine(userUuid, content, image, frequency)
 
-    return jsonify(result=bool_result)
+    return jsonify(returnResult)
 
 if __name__ == '__main__':
     app.run(debug=True)

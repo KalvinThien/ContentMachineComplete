@@ -124,7 +124,7 @@ def post_to_facebook(is_testmode=False):
         is_test = is_testmode
     )
 
-def schedule_fb_post( caption, image_query ):
+def schedule_fb_post( user_id, caption, image_query ):
     if (image_query is None or image_query == '' or caption is None or caption == ''):
         print('🔥 Error scheduling for FB')
         return ''
@@ -137,6 +137,7 @@ def schedule_fb_post( caption, image_query ):
         'published' : True
     }
     result = firestore_instance.upload_scheduled_post(
+        user_id,
         PostingPlatform.FACEBOOK, 
         payload
     )

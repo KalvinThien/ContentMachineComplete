@@ -10,12 +10,13 @@ import content.twitter_content_repo as twitter_content_repo
 import content.youtube_content_repo as youtube_content_repo
 import content.linkedin_content_repo as linkedin_content_repo
 import content.medium_content_repo as medium_content_repo
+import utility.utils as utils
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, "../src"))
 
-def run_text_machine( user_uuid, content_summary, image_query, frequency ):
+def run_text_machine( user_uuid, content_summary, content_image, frequency ):
   
   try:
       gpt.gpt_generate_summary(content_summary)
@@ -34,16 +35,20 @@ def run_text_machine( user_uuid, content_summary, image_query, frequency ):
         twitterGenerationCount = 24
       
       # META 
-      facebookPosts = gpt.generate_text_prompt(
+      facebookPosts = gpt.generate_image_prompt(
+        user_id=user_uuid,
         prompt_source=os.path.join('src', 'input_prompts', 'facebook.txt'),
+        image_query=content_image,
         post_num=generationCount,
         upload_func=fb_content_repo.schedule_fb_post
       )
-      # instagramPosts = gpt.generate_image_prompt(
-      #   prompt_source=os.path.join('src', 'input_prompts', 'instagram.txt'),
-      #   post_num=generationCount,
-      #   upload_func=ig_content_repo.schedule_ig_image_post
-      # )
+      instagramPosts = gpt.generate_image_prompt(
+        user_id=user_uuid,
+        prompt_source=os.path.join('src', 'input_prompts', 'instagram.txt'),
+        image_query=content_image,
+        post_num=generationCount,
+        upload_func=ig_content_repo.schedule_ig_image_post
+      )
 
       # # BLOG AND PROMOS
       # blogPosts = gpt.generate_text_prompt(
@@ -59,13 +64,19 @@ def run_text_machine( user_uuid, content_summary, image_query, frequency ):
       #   upload_func=twitter_content_repo.schedule_tweet
       # )
 
-      print(facebookPosts)
+      scheduledOutput = {
+        'facebook': utils.randomize_array(facebookPosts),
+        'instagram': utils.randomize_array(instagramPosts),
+      }
       # print(instagramPosts)
       # print(blogPosts)
       # print(tweetPosts)
           
       print('Finished as SUCCESS')
-      return True
+      return scheduledOutput
   except Exception as e:
       print(f'Finished with error {e}')
-      return False        
+      return {
+        'message': 'finished with error',
+        'error': str(e)
+      }        
