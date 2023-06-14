@@ -19,7 +19,7 @@ export class CreateContentComponent implements OnInit {
   inputPrompt: string = '';
   imagePrompt: string = '';
 
-  frequencyOptions = [
+  frequencyOptions: any[] = [
     { title: 'Passive', description: 'Every day', value: 'passive' },
     { title: 'Professional', description: 'Every week', value: 'professional' },
     { title: 'Aggressive', description: 'Every month', value: 'aggressive' },
@@ -37,11 +37,7 @@ export class CreateContentComponent implements OnInit {
     this.currentContentStage = this.contentCreationStage.INIT;
   }
 
-  onCreateSelected(selectedOption?: {
-    title: string;
-    desctipion: string;
-    value: string;
-  }) {
+  onCreateSelected(selectedOption: any) {
     if (selectedOption === undefined) {
       this.messageService.add({
         severity: 'warning',
@@ -54,7 +50,7 @@ export class CreateContentComponent implements OnInit {
     this.contentService.createContent(
       this.inputPrompt,
       this.imagePrompt,
-      selectedOption?.value
+      selectedOption
     );
   }
 

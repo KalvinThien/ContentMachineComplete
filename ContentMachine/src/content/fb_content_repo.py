@@ -4,7 +4,7 @@ import meta_graph_api.meta_tokens as meta_tokens
 from domain.endpoint_definitions import make_api_call
 import media.image_creator as image_creator
 import appsecrets as appsecrets
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 import domain.url_shortener as url_shortener
 import storage.dropbox_storage as dropbox_storage
 import ai.gpt as gpt

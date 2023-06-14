@@ -3,7 +3,7 @@ import os
 import requests
 import json
 import appsecrets
-from storage.firebase_storage import PostingPlatform
+from storage.firebase_firestore import PostingPlatform
 import domain.endpoint_definitions as endpoint_definition
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.

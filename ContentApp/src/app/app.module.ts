@@ -39,6 +39,7 @@ import { StepsModule } from 'primeng/steps';
 import { ListboxModule } from 'primeng/listbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
+import { DropdownModule } from 'primeng/dropdown';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -71,6 +72,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     CreateContentComponent,
   ],
   imports: [
+    DropdownModule,
     InputTextareaModule,
     ListboxModule,
     StepsModule,

@@ -2,7 +2,7 @@ import sys
 import os
 import tweepy
 import appsecrets
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 import json
 import ai.gpt as gpt
 import domain.url_shortener as url_shortener

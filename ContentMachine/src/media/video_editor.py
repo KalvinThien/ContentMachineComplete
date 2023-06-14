@@ -5,7 +5,7 @@ import json
 import appsecrets as appsecrets
 import utility.utils as utils
 import media.image_creator as image_creator
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 import ai.speech_synthesis as speech_synthesis
 import time
 
@@ -92,7 +92,7 @@ def edit_movie_for_remote_url ( image_query ):
     if (project_id != -1):
         print(f'\nproject id {project_id}\n')
         movie_url = get_edited_movie_url(project_id)
-        # if (movie_url != ''): firebase_storage_instance.delete_storage_file(speech_bundle['speech_remote_path'])
+        # if (movie_url != ''): firebase_firestore_instance.delete_storage_file(speech_bundle['speech_remote_path'])
         return movie_url
     else:
         print('error processing project id')

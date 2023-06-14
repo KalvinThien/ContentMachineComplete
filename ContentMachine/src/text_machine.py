@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import sys
 import os
 import ai.gpt as gpt
+import storage.dropbox_storage as dropbox_storage
 import content.ig_content_repo as ig_content_repo
 import content.fb_content_repo as fb_content_repo
 import content.twitter_content_repo as twitter_content_repo
@@ -14,9 +15,12 @@ import content.medium_content_repo as medium_content_repo
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, "../src"))
 
-def run_text_machine( user_uuid, content_summary, image_query, frequency ):
+async def run_text_machine( user_uuid, content_summary, image_query, frequency ):
   
   try:
+      print('🔻 downloading prompts')
+      dropbox_storage.bulk_download_prompts()
+      print('🔺 downloaded prompts')
       gpt.gpt_generate_summary(content_summary)
         
       # we need to consider the posting numbers
@@ -38,30 +42,30 @@ def run_text_machine( user_uuid, content_summary, image_query, frequency ):
         post_num=generationCount,
         upload_func=fb_content_repo.schedule_fb_post
       )
-      instagramPosts = gpt.generate_image_prompt(
-        prompt_source=os.path.join('src', 'input_prompts', 'instagram.txt'),
-        post_num=generationCount,
-        upload_func=ig_content_repo.schedule_ig_image_post
-      )
+      # instagramPosts = gpt.generate_image_prompt(
+      #   prompt_source=os.path.join('src', 'input_prompts', 'instagram.txt'),
+      #   post_num=generationCount,
+      #   upload_func=ig_content_repo.schedule_ig_image_post
+      # )
 
-      # BLOG AND PROMOS
-      blogPosts = gpt.generate_text_prompt(
-        prompt_source=os.path.join('src', 'input_prompts', 'blog.txt'),
-        post_num=generationCount,
-        upload_func=medium_content_repo.schedule_medium_article
-      )
+      # # BLOG AND PROMOS
+      # blogPosts = gpt.generate_text_prompt(
+      #   prompt_source=os.path.join('src', 'input_prompts', 'blog.txt'),
+      #   post_num=generationCount,
+      #   upload_func=medium_content_repo.schedule_medium_article
+      # )
       
-      # TWEETS
-      tweetPosts = gpt.generate_text_prompt(
-        prompt_source=os.path.join('src', 'input_prompts', 'tweetstorm.txt'),
-        post_num=twitterGenerationCount,
-        upload_func=twitter_content_repo.schedule_tweet
-      )
+      # # TWEETS
+      # tweetPosts = gpt.generate_text_prompt(
+      #   prompt_source=os.path.join('src', 'input_prompts', 'tweetstorm.txt'),
+      #   post_num=twitterGenerationCount,
+      #   upload_func=twitter_content_repo.schedule_tweet
+      # )
 
       print(facebookPosts)
-      print(instagramPosts)
-      print(blogPosts)
-      print(tweetPosts)
+      # print(instagramPosts)
+      # print(blogPosts)
+      # print(tweetPosts)
           
       print('Finished as SUCCESS')
       return True

@@ -6,7 +6,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
 import ai.gpt as gpt3
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 import storage.dropbox_storage as dropbox_storage
 import pickle
 import json
