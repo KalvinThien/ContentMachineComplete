@@ -15,12 +15,9 @@ import content.medium_content_repo as medium_content_repo
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, "../src"))
 
-async def run_text_machine( user_uuid, content_summary, image_query, frequency ):
+def run_text_machine( user_uuid, content_summary, image_query, frequency ):
   
   try:
-      print('🔻 downloading prompts')
-      dropbox_storage.bulk_download_prompts()
-      print('🔺 downloaded prompts')
       gpt.gpt_generate_summary(content_summary)
         
       # we need to consider the posting numbers

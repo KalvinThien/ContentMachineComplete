@@ -60,7 +60,7 @@ def facebook_callback():
         return jsonify({ 'Authentication failed.', 500 })
 
 @app.route('/api/schedule-text-posts', methods=['POST'])
-async def text_to_content():
+def text_to_content():
     data = request.json
     print("🚀 ~ file: app.py:58 ~ data:", data)
     userUuid = data['userUuid']
@@ -71,9 +71,13 @@ async def text_to_content():
     if (userUuid is None or content is None or image is None or frequency is None):
         return jsonify(result=False)
     else:
-        firebase_storage.downoad_input_prompts('input_prompts', os.path.join('src', 'input_prompts'))
+        print('🔻 downloading prompts')
+        value = firebase_storage.downoad_input_prompts('input_prompts', os.path.join('src', 'input_prompts'))
+        print("🚀 ~ file: app.py:67 ~ value:", value)
+        print('🔺 downloaded prompts')
+
     
-    bool_result = await text_machine.run_text_machine(userUuid, content, image, frequency)
+    bool_result = text_machine.run_text_machine(userUuid, content, image, frequency)
 
     return jsonify(result=bool_result)
 

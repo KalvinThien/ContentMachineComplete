@@ -13,21 +13,18 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, "../src"))
 
 # Initialize Firebase Admin SDK.
-cred = credentials.Certificate('path/to/serviceAccountKey.json')
+cred = credentials.Certificate(os.path.join('src', "legion-ai-content-machine-63f5b63456a6.json"))
 firebase_admin.initialize_app(cred, {
     'storageBucket': appsecrets.FIREBASE_CONFIG['storageBucket']
 })
 
 # Get the storage bucket
-bucket_name = firebase_admin.get_app().options['storageBucket']
+bucket_name = appsecrets.FIREBASE_CONFIG['storageBucket']
 bucket = storage.Client().get_bucket(bucket_name)
 
 # 'bucket' is an object defined in the google-cloud-storage Python library.
 # See https://googlecloudplatform.github.io/google-cloud-python/latest/storage/buckets.html
 # for more details.
-
-from google.cloud import storage
-
 
 
 def download_blob(source_blob_name, destination_file_name):
@@ -59,15 +56,14 @@ def download_blob(source_blob_name, destination_file_name):
     )
 
 def downoad_input_prompts(download_folder_name, destination_folder_name):
-    print("🚀 ~ file: firebase_storage.py:62 ~ destination_folder_name:", destination_folder_name)
-    print("🚀 ~ file: firebase_storage.py:62 ~ download_folder_name:", download_folder_name)
     """Iterates through all files in a folder in the bucket."""
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
 
-    blobs = bucket.list_blobs(prefix=download_folder_name)
+    blobs = bucket.list_blobs()
     for blob in blobs:
         # Process each file here
         # Example: Print the name of the file
         print("File Name:", blob.name)
-        download_blob(f"{download_folder_name}/{blob.name}", f"{destination_folder_name}/{blob.name}")
+        download_blob(blob.name, f"{destination_folder_name}/{blob.name}")
+    return True    

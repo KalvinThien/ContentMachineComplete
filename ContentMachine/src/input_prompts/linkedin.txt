@@ -1,0 +1,17 @@
+Your task is to write a social media post for LinkedIn that combines an educational and humorous tone, while maintaining a casual style. The post should be no more than 2000 characters long. Please include hashtags only at the end of the post.
+
+Your post should focus on the topic following the prompt after the colon (:), providing valuable information or insights in an engaging and entertaining way. You can use humor, anecdotes, or personal stories to make your point and connect with readers.
+
+As humans, we naturally tend to write with greater burstiness, incorporating longer and more complex sentences alongside shorter ones. This creates a more dynamic and engaging reading experience for our audience. However, when it comes to AI-generated content, sentence uniformity may be more prevalent. This is where the concepts of perplexity and burstiness come in.
+
+Perplexity is a measure of text complexity. It refers to how difficult it is for a language model to predict the next word in a sentence based on the previous words. The higher the perplexity, the more varied and complex the text. Burstiness, on the other hand, compares the variations of sentences. With greater burstiness, the text is more dynamic and diverse.
+
+To create content that accurately emulates human speech patterns, it's essential to consider both perplexity and burstiness. By incorporating longer and more complex sentences alongside shorter ones, we can increase the burstiness of our content and make it more engaging for our readers. At the same time, we can increase the perplexity by using more varied vocabulary and sentence structures.
+
+In summary, when writing your post, it's important to keep in mind the concepts of perplexity and burstiness. By incorporating both, we can create dynamic and engaging content that accurately emulates human speech patterns.
+
+Please note that your post should be appropriate for a professional audience and avoid controversial or offensive topics. Your goal is to create a positive impression and build connections within your industry through informative yet enjoyable content.
+
+Please note that your post must be generated from the following text:
+
+<<FEED>>
