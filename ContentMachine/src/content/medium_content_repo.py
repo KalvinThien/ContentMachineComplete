@@ -75,7 +75,7 @@ def post_medium_blog_article( schedule_datetime_str ):
     else:
         print(f"🔥 MD Error creating post: {response.status_code} - {response.text}") 
 
-def schedule_medium_article(blog, image_query='technology'):
+def schedule_medium_article( user_id, blog, image_query ):
     if (blog is None or blog == ''):
         print('🔥 Error scheduling MD')
         return ''
@@ -102,6 +102,7 @@ def schedule_medium_article(blog, image_query='technology'):
         payload['content'] = body
         
         result = firestore_instance.upload_scheduled_post(
+            user_id,
             PostingPlatform.MEDIUM, 
             payload
         )

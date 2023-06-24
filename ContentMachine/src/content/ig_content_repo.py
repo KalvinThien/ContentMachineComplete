@@ -194,7 +194,8 @@ def schedule_ig_image_post( user_id, caption, image_query ):
 
     @returns: nothing
     '''
-    params = meta_tokens.fetch_personal_access_token(user_id) 
+    params = meta_tokens.create_core_request_object()
+    # params = meta_tokens.fetch_personal_access_token(user_id) 
     params['media_type'] = 'IMAGE' 
         
     params['media_url'] = image_creator.get_unsplash_image_url(image_query, PostingPlatform.INSTAGRAM) 

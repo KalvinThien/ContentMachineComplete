@@ -74,7 +74,6 @@ def text_to_content():
         print('🔻 downloading prompts')
         firebase_storage.downoad_input_prompts('input_prompts', os.path.join('src', 'input_prompts'))
         print('🔺 downloaded prompts')
-
     
     returnResult = text_machine.run_text_machine(userUuid, content, image, frequency)
 

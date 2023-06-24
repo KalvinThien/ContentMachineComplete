@@ -11,6 +11,7 @@ import content.youtube_content_repo as youtube_content_repo
 import content.linkedin_content_repo as linkedin_content_repo
 import content.medium_content_repo as medium_content_repo
 import utility.utils as utils
+import random
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -51,26 +52,30 @@ def run_text_machine( user_uuid, content_summary, content_image, frequency ):
       )
 
       # # BLOG AND PROMOS
-      # blogPosts = gpt.generate_text_prompt(
-      #   prompt_source=os.path.join('src', 'input_prompts', 'blog.txt'),
-      #   post_num=generationCount,
-      #   upload_func=medium_content_repo.schedule_medium_article
-      # )
+      blogPosts = gpt.generate_image_prompt(
+        user_id=user_uuid, 
+        prompt_source=os.path.join('src', 'input_prompts', 'blog.txt'),
+        image_query=content_image,
+        post_num=generationCount,
+        upload_func=medium_content_repo.schedule_medium_article
+      )
       
       # # TWEETS
-      # tweetPosts = gpt.generate_text_prompt(
-      #   prompt_source=os.path.join('src', 'input_prompts', 'tweetstorm.txt'),
-      #   post_num=twitterGenerationCount,
-      #   upload_func=twitter_content_repo.schedule_tweet
-      # )
+      tweetPosts = gpt.generate_mixed_image_text_prompt(
+        user_id=user_uuid,
+        prompt_source=os.path.join('src', 'input_prompts', 'tweetstorm.txt'),
+        image_query=content_image,
+        post_num=twitterGenerationCount,
+        text_func=twitter_content_repo.schedule_tweet,
+        image_func=twitter_content_repo.schedule_image_tweet
+      )
 
       scheduledOutput = {
         'facebook': utils.randomize_array(facebookPosts),
         'instagram': utils.randomize_array(instagramPosts),
+        'blog': utils.randomize_array(blogPosts),
+        'tweet': utils.randomize_array(tweetPosts),
       }
-      # print(instagramPosts)
-      # print(blogPosts)
-      # print(tweetPosts)
           
       print('Finished as SUCCESS')
       return scheduledOutput

@@ -55,6 +55,16 @@ def download_blob(source_blob_name, destination_file_name):
         )
     )
 
+def download_if_needed( remote_file_path, local_download_path, dl_func ):
+    # Check if this is the earliest uploaded video file
+    if (remote_file_path is None):
+        print("🔥 No files found") 
+        return ''
+    elif (os.path.isfile(local_download_path)):    
+        return local_download_path
+    else:
+        return dl_func(remote_file_path, local_download_path)    
+
 def downoad_input_prompts(download_folder_name, destination_folder_name):
     """Iterates through all files in a folder in the bucket."""
     storage_client = storage.Client()
@@ -64,5 +74,9 @@ def downoad_input_prompts(download_folder_name, destination_folder_name):
     for blob in blobs:
         # Process each file here
         # Example: Print the name of the file
-        download_blob(blob.name, f"{destination_folder_name}/{blob.name}")
+        blob_destination = f"{destination_folder_name}/{blob.name}"
+        if (os.path.isfile(blob_destination)):
+            print(f"🔥 {blob_destination} already exists")
+        else:
+            download_blob(blob.name, blob_destination)
     return True    

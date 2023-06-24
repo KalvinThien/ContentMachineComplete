@@ -7,6 +7,7 @@ import openai
 import textwrap
 import utility.utils as utils
 import appsecrets as appsecrets
+import random
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -139,7 +140,27 @@ def generate_image_prompt(
 
         resultsArray.append(upload_func(user_id, gpt_text, image_query))
     return resultsArray
-        
+
+def generate_mixed_image_text_prompt(
+        user_id,
+        prompt_source, 
+        image_query,
+        post_num, 
+        text_func,
+        image_func
+    ):        
+    resultsArray = []
+    for num in range(post_num):
+        print(f'Processing #{num + 1} of {prompt_source}')
+        gpt_text = get_gpt_generated_text(prompt_source)
+
+        item = random.random()
+        if (item < 0.25):
+            resultsArray.append(image_func(user_id, gpt_text, image_query))
+        else:
+            resultsArray.append(text_func(user_id, gpt_text))
+
+    return resultsArray
 
 def prompt_to_string_from_file( prompt_source_file, feedin_source_file ):
     print("🚀 ~ file: gpt.py:129 ~ prompt_to_string_from_file:", prompt_source_file, feedin_source_file)
