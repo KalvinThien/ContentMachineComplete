@@ -102,13 +102,7 @@ export class AccounthubComponent implements OnInit, OnChanges {
             this.youtubeConnected = true;
           } else if (account.platform === PostingPlatform.TWITTER) {
             this.twitterConnected = true;
-          } else {
-            this.messageService.add({
-              severity: 'danger',
-              summary: 'Opps! Sorry about that.',
-              detail: `Unknown platform: ${account.platform}`,
-            });
-          }
+          } 
         });
       },
       error: (error) => {

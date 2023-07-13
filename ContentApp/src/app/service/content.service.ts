@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import axios, { AxiosResponse } from 'axios';
 import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { CalendarEvent } from 'angular-calendar';
 import { FirestoreRepository } from '../repository/firebase/firestore.repo';
-
+import { EventColor } from 'calendar-utils';
 @Injectable({
   providedIn: 'root',
 })
@@ -13,7 +13,34 @@ export class ContentService {
   private calendarEventsSubject = new Subject<CalendarEvent[]>();
 
   errorObservable$ = this.errorSubject.asObservable();
-  calendarEventsObservable$ = this.calendarEventsSubject.asObservable();
+  calendarEventsObservable$: Observable<CalendarEvent[]> = this.calendarEventsSubject.asObservable();
+
+  colors: Record<string, EventColor> = {
+    facebook: {
+      primary: '#3b5998',
+      secondary: '#8b9dc3',
+    },
+    twitter: {
+      primary: '#1DA1F2',
+      secondary: '#AAB8C2',
+    },
+    instagram: {
+      primary: '#C13584',
+      secondary: '#E1306C',
+    },
+    blog: {
+      primary: '#FF0000',
+      secondary: '#C13584',
+    },
+    linkedin: {
+      primary: '#0077B5',
+      secondary: '#0077B5',
+    },
+    default: {
+      primary: '#000000',
+      secondary: '#000000',
+    },
+  };
 
   constructor(
     private fireAuthRepo: FireAuthRepository,
@@ -54,19 +81,26 @@ export class ContentService {
         }
 
         for (const [post_type, post] of Object.entries(response.data)) {
-          console.log("🚀 ~ file: content.service.ts:51 ~ .then ~ post_type, post:", post_type, post)
-          
-          for (const [iso_date, post_data] of Object.entries(post as any)) {
+          console.log(
+            '🚀 ~ file: content.service.ts:51 ~ .then ~ post_type, post:',
+            post_type,
+            post
+          );
+
+          (post as any[]).forEach(post_data => {
+
             const key = Object.keys(post_data as any)[0]; // Get the first key in the object
             const value = (post_data as any)[key];
-            console.log("🚀 ~ file: content.service.ts:54 ~ .then ~ iso_date, post_data:", iso_date, post_data)
-            let event = this.convert_post_to_event(
-              post_type,
+            console.log(
+              '🚀 ~ file: content.service.ts:54 ~ .then ~ iso_date, post_data:',
               key,
-              value
+              post_data
             );
+            let event = this.convert_post_to_event(post_type, key, value);
+            console.log("🚀 ~ file: content.service.ts:100 ~ ContentService ~ .then ~ event:", event)
             calendarEvents.push(event);
-          }
+            console.log("🚀 ~ file: content.service.ts:102 ~ ContentService ~ .then ~ calendarEvents:", calendarEvents)
+          });
         }
         this.calendarEventsSubject.next(calendarEvents);
       })
@@ -81,43 +115,20 @@ export class ContentService {
     iso_date: string,
     post: any
   ): CalendarEvent {
-    console.log("🚀 ~ file: content.service.ts:84 ~ post:", post)
-    console.log("🚀 ~ file: content.service.ts:84 ~ iso_date:", iso_date)
-    console.log("🚀 ~ file: content.service.ts:84 ~ post_type:", post_type)
-    let primary_color_by_type: string;
-    let accent_color_by_type: string;
-    switch (post_type) {
-      case 'facebook':
-        primary_color_by_type = '#3b5998';
-        accent_color_by_type = '#8b9dc3';
-        break;
-      case 'twitter':
-        primary_color_by_type = '#1DA1F2';
-        accent_color_by_type = '#AAB8C2';
-        break;
-      case 'instagram':
-        primary_color_by_type = '#C13584';
-        accent_color_by_type = '#E1306C';
-        break;
-      case ' blog':
-        primary_color_by_type = '#FF0000';
-        accent_color_by_type = '#C13584';
-        break;
-      default:
-        primary_color_by_type = '#000000';
-        accent_color_by_type = '#000000';
-    }
+    console.log('🚀 ~ file: content.service.ts:84 ~ post:', post);
+    console.log('🚀 ~ file: content.service.ts:84 ~ iso_date:', iso_date);
+    console.log('🚀 ~ file: content.service.ts:84 ~ post_type:', post_type);
 
     switch (post_type) {
       case 'facebook':
         post = {
-          title: post.message.slice(0, 12),
+          title: post.message.slice(0, 6),
           content: post.message,
           image_url: post.url,
           media_type: post.media_type,
           set_to_publish: post.published,
-          color: primary_color_by_type,
-          accent_color: accent_color_by_type,
+          color: this.colors['facebook'].primary,
+          accent_color: this.colors['facebook'].secondary,
         };
         break;
       case 'twitter':
@@ -126,24 +137,24 @@ export class ContentService {
           image_media = 'IMAGE';
         }
         post = {
-          title: post.tweet.slice(0, 12),
+          title: post.tweet.slice(0, 6),
           content: post.tweet,
           image_url: post.media_url,
           media_type: image_media,
           set_to_publish: true,
-          color: primary_color_by_type,
-          accent_color: accent_color_by_type,
+          color: this.colors['twitter'].primary,
+          accent_color: this.colors['twitter'].secondary,
         };
         break;
       case 'instagram':
         post = {
-          title: post.caption.slice(0, 12),
+          title: post.caption.slice(0, 6),
           content: post.caption,
           image_url: post.image_url,
           media_type: 'IMAGE',
           set_to_publish: post.published,
-          color: primary_color_by_type,
-          accent_color: accent_color_by_type,
+          color: this.colors['instagram'].primary,
+          accent_color: this.colors['instagram'].secondary,
         };
         break;
       case 'blog':
@@ -153,8 +164,8 @@ export class ContentService {
           image_url: '',
           media_type: 'NONE',
           set_to_publish: true,
-          color: primary_color_by_type,
-          accent_color: accent_color_by_type,
+          color: this.colors['blog'].primary,
+          accent_color: this.colors['blog'].secondary,
         };
         break;
       default:
@@ -171,7 +182,7 @@ export class ContentService {
         post_type: post_type,
         post_date: iso_date,
         post_data: post,
-      },
+      }
     };
     return event;
   }
