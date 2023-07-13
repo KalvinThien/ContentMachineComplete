@@ -81,28 +81,18 @@ export class ContentService {
         }
 
         for (const [post_type, post] of Object.entries(response.data)) {
-          console.log(
-            '🚀 ~ file: content.service.ts:51 ~ .then ~ post_type, post:',
-            post_type,
-            post
-          );
-
-          (post as any[]).forEach(post_data => {
-
+          console.log(post_type, post);
+          for (const [key, post_data] of Object.entries(post as any)) {
+            console.log("🚀 ~ file: content.service.ts:86 ~ ContentService ~ .then ~ post_data:", post_data)
             const key = Object.keys(post_data as any)[0]; // Get the first key in the object
             const value = (post_data as any)[key];
-            console.log(
-              '🚀 ~ file: content.service.ts:54 ~ .then ~ iso_date, post_data:',
-              key,
-              post_data
-            );
             let event = this.convert_post_to_event(post_type, key, value);
-            console.log("🚀 ~ file: content.service.ts:100 ~ ContentService ~ .then ~ event:", event)
+            console.log("🚀 ~ file: content.service.ts:88 ~ ContentService ~ .then ~ event:", event)
             calendarEvents.push(event);
-            console.log("🚀 ~ file: content.service.ts:102 ~ ContentService ~ .then ~ calendarEvents:", calendarEvents)
-          });
+          };
         }
         this.calendarEventsSubject.next(calendarEvents);
+        console.log("🚀 ~ file: content.service.ts:93 ~ ContentService ~ .then ~ calendarEvents:", calendarEvents)
       })
       .catch((error) => {
         // Handle any errors that occurred during the request
@@ -122,7 +112,7 @@ export class ContentService {
     switch (post_type) {
       case 'facebook':
         post = {
-          title: post.message.slice(0, 6),
+          title: post.message.slice(0, 12),
           content: post.message,
           image_url: post.url,
           media_type: post.media_type,
@@ -131,13 +121,13 @@ export class ContentService {
           accent_color: this.colors['facebook'].secondary,
         };
         break;
-      case 'twitter':
+      case 'tweet':
         let image_media = 'NONE';
         if (post.media_url !== '') {
           image_media = 'IMAGE';
         }
         post = {
-          title: post.tweet.slice(0, 6),
+          title: post.tweet.slice(0, 12),
           content: post.tweet,
           image_url: post.media_url,
           media_type: image_media,
@@ -148,7 +138,7 @@ export class ContentService {
         break;
       case 'instagram':
         post = {
-          title: post.caption.slice(0, 6),
+          title: post.caption.slice(0, 12),
           content: post.caption,
           image_url: post.image_url,
           media_type: 'IMAGE',
