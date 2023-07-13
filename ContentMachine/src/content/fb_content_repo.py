@@ -129,10 +129,10 @@ def schedule_fb_post( user_id, caption, image_query ):
         print('🔥 Error scheduling for FB')
         return ''
     
-    image_url = image_creator.get_unsplash_image_url(image_query, PostingPlatform.FACEBOOK)
+    # image_url = image_creator.get_unsplash_image_url(image_query, PostingPlatform.FACEBOOK)
     payload = {
         'media_type': 'IMAGE',
-        'url': image_url,
+        # 'url': image_url,
         'message': caption, 
         'published' : True
     }

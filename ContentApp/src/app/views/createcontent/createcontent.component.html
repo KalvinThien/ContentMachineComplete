@@ -60,7 +60,7 @@
   <br/>
   <br/>
   <p-footer>
-    <button pButton type="button" label="Create!" icon="pi pi-plus" styleClass="p-button-success"
+    <button pButton type="button" label="Create!" icon="pi pi-plus" styleClass="p-button-success" [loading]="createLoading"
       [disabled]="selectedFrequency == undefined || inputPrompt == ''" (click)="onCreateSelected(selectedFrequency)">
     </button>
   </p-footer>

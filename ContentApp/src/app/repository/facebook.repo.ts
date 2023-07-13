@@ -40,7 +40,7 @@ export class FacebookRepository {
 
   exchangeAuthCodeForAccessToken(facebookAuthCode: string): Observable<any> {
     return from(
-      axios.get<{message: string, data: any}>('http://localhost:5000/api/facebook/callback', {
+      axios.get<{message: string, data: any}>('http://localhost:8000/api/facebook/callback', {
         params: {
           authCode: facebookAuthCode,
         }

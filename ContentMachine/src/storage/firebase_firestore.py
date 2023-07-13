@@ -31,9 +31,7 @@ class FirebaseFirestore():
     # deprecated Realtime Database
     firebaseRealtimeDatabase = firebase.database()
 
-    POSTS_COLLECTION = "posts"
-    POSTS_COLLECTION_APPEND_PATH = "_posts"
-    
+    POSTS_COLLECTION = "posts"    
     BLOGS_COLLECTION = "posted_blogs" 
 
     # deprecated above
@@ -94,9 +92,7 @@ class FirebaseFirestore():
 
     @classmethod
     def get_earliest_scheduled_datetime( self, platform ):
-        scheduled_posts_path = platform.value + self.POSTS_COLLECTION_APPEND_PATH
-
-        collection = self.firebaseRealtimeDatabase.child(scheduled_posts_path).get().each()
+        collection = self.firebaseRealtimeDatabase.child(platform.value).get().each()
         if (collection is None):
             print(f'{platform.value} earliest scheduled datetime not found')
             return ''
@@ -114,9 +110,8 @@ class FirebaseFirestore():
 
     @classmethod
     def get_latest_scheduled_datetime( self, user_id, platform ):
-        scheduled_posts_path = platform.value + self.POSTS_COLLECTION_APPEND_PATH
 
-        collection = self.firebaseRealtimeDatabase.child(user_id).child(scheduled_posts_path).get().each()
+        collection = self.firebaseRealtimeDatabase.child(user_id).child(platform.value).get().each()
 
         if (collection is None):
             return scheduler.get_best_posting_time(platform)
@@ -144,8 +139,7 @@ class FirebaseFirestore():
             Returns:
                 string. JSON string translated from the specific document fetched from firebase
         '''
-        specific_collection = f'{platform.value}{self.POSTS_COLLECTION_APPEND_PATH}'
-        result = self.firebaseRealtimeDatabase.child(specific_collection).get()
+        result = self.firebaseRealtimeDatabase.child(platform.value).get()
 
         if result.each() is None:
             return "No document found with the specified property value."
@@ -157,6 +151,10 @@ class FirebaseFirestore():
 
     @classmethod
     def upload_scheduled_post( self, user_id, platform, payload ):
+        print(f'upload_scheduled_post() user_id: {user_id} platform: {platform} payload: {payload}')
+        print(f'upload_scheduled_post() user_id: {user_id} platform: {platform.value} payload: {payload}')
+        print(f'{self.firebaseRealtimeDatabase.child(user_id).child(platform.value)}')
+
         last_posted_time = self.get_latest_scheduled_datetime(user_id, platform)
 
         if (last_posted_time == '' or last_posted_time is None):
@@ -164,16 +162,14 @@ class FirebaseFirestore():
         else:
             future_publish_date = scheduler.get_best_posting_time(platform, last_posted_time)
 
-        specific_collection = platform.value + self.POSTS_COLLECTION_APPEND_PATH
-        result = self.firebaseRealtimeDatabase.child(user_id).child(specific_collection).update({
+        result = self.firebaseRealtimeDatabase.child(user_id).child(platform.value).update({
             future_publish_date: payload
         })
         return result
 
     @classmethod
     def delete_post( self, platform, datetime_key ):
-        scheduled_posts_path = platform.value + self.POSTS_COLLECTION_APPEND_PATH
-        result = self.firebaseRealtimeDatabase.child(scheduled_posts_path).child(datetime_key).remove()
+        result = self.firebaseRealtimeDatabase.child(platform.value).child(datetime_key).remove()
         print(f'{platform.value} firebase deleting @ key {datetime_key}')
         return result
     
