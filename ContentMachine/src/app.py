@@ -3,6 +3,20 @@ from flask_cors import CORS
 import requests
 import appsecrets
 import text_machine as text_machine
+import storage.firebase_storage as firebase_storage
+import os
+import sys
+import firebase_admin
+from firebase_admin import credentials
+
+# This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, "../src"))
+
+# Initialize the SDK with the service account credentials
+cred = credentials.Certificate(os.path.join(current_dir, 'legion-ai-content-machine-63f5b63456a6.json'))
+# firebase_admin.initialize_app(cred)
+
 
 app = Flask(__name__)
 CORS(app)
@@ -55,13 +69,22 @@ def facebook_callback():
 @app.route('/api/schedule-text-posts', methods=['POST'])
 def text_to_content():
     data = request.json
+    print("🚀 ~ file: app.py:58 ~ data:", data)
     userUuid = data['userUuid']
     content = data['content']
     image = data['image']
-    
-    bool_result = text_machine.process_text(userUuid, content, image)
+    frequency = data['frequency']
 
-    return jsonify(result=bool_result)
+    if (userUuid is None or content is None or image is None or frequency is None):
+        return jsonify(result=False)
+    else:
+        print('🔻 downloading prompts')
+        firebase_storage.downoad_input_prompts('input_prompts', os.path.join('src', 'input_prompts'))
+        print('🔺 downloaded prompts')
+    
+    returnResult = text_machine.run_text_machine(userUuid, content, image, frequency)
+
+    return jsonify(returnResult)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=8000, debug=True)

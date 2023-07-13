@@ -3,7 +3,7 @@ import appsecrets as appsecrets
 import requests
 import json
 import os
-from storage.firebase_storage import PostingPlatform
+from storage.firebase_firestore import PostingPlatform
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))

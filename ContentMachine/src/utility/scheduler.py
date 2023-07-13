@@ -1,7 +1,7 @@
 import sys
 import os
 from datetime import datetime, timedelta
-import storage.firebase_storage as firebase_storage
+import storage.firebase_firestore as firebase_firestore
 import utility.time_utils as time_utils
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
@@ -73,17 +73,17 @@ def get_best_posting_time(
         formatted_iso = time_utils.convert_str_to_iso_format(last_posted_time)
         last_posted_time = datetime.fromisoformat(formatted_iso)
 
-    if (posting_platform == firebase_storage.PostingPlatform.FACEBOOK):
+    if (posting_platform == firebase_firestore.PostingPlatform.FACEBOOK):
         times_array = facebook_times_array
-    elif (posting_platform == firebase_storage.PostingPlatform.YOUTUBE):
+    elif (posting_platform == firebase_firestore.PostingPlatform.YOUTUBE):
         times_array = youtube_times_array
-    elif (posting_platform == firebase_storage.PostingPlatform.TWITTER):
+    elif (posting_platform == firebase_firestore.PostingPlatform.TWITTER):
         times_array = twitter_times_array  
-    elif (posting_platform == firebase_storage.PostingPlatform.INSTAGRAM):      
+    elif (posting_platform == firebase_firestore.PostingPlatform.INSTAGRAM):      
         times_array = instagram_times_array
-    elif (posting_platform == firebase_storage.PostingPlatform.MEDIUM):
+    elif (posting_platform == firebase_firestore.PostingPlatform.MEDIUM):
         times_array = medium_times_array    
-    elif (posting_platform == firebase_storage.PostingPlatform.LINKEDIN):
+    elif (posting_platform == firebase_firestore.PostingPlatform.LINKEDIN):
         times_array = linkedin_times_array    
     else:
         '' #this will need to be updated for an error handling system

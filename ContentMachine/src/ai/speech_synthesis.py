@@ -1,7 +1,7 @@
 import sys
 import os
 import appsecrets as appsecrets
-from storage.firebase_storage import firestore_instance
+from storage.firebase_firestore import firestore_instance
 import audioread
 import requests
 import json

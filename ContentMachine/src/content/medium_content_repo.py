@@ -6,7 +6,7 @@ import utility.text_utils as text_utils
 import media.image_creator as image_creator
 import ai.gpt as gpt
 import json
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -75,7 +75,7 @@ def post_medium_blog_article( schedule_datetime_str ):
     else:
         print(f"🔥 MD Error creating post: {response.status_code} - {response.text}") 
 
-def schedule_medium_article(blog, image_query='technology'):
+def schedule_medium_article( user_id, blog, image_query ):
     if (blog is None or blog == ''):
         print('🔥 Error scheduling MD')
         return ''
@@ -102,12 +102,15 @@ def schedule_medium_article(blog, image_query='technology'):
         payload['content'] = body
         
         result = firestore_instance.upload_scheduled_post(
+            user_id,
             PostingPlatform.MEDIUM, 
             payload
         )
         print(f'📦 MD result {result}')
+        return result
     except Exception as e:
-        print(f'🔥 MD: Something went wrong parsing blog {e}')        
+        print(f'🔥 MD: Something went wrong parsing blog {e}')  
+        return ''      
 
 #construct and save address of uploaded blog
                 # if (result):

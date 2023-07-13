@@ -1,7 +1,7 @@
 import sys
 import os
 import subprocess
-from storage.firebase_storage import firestore_instance
+from storage.firebase_firestore import firestore_instance
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -57,7 +57,7 @@ def convert_local_video_to_mp3(input_file):
 # def get_downloaded_video_local_path( remote_video_url ):
 #     try:
 #         upload_file_path = download_video(remote_video_url)
-#         # firebase_storage_instance.upload_file_to_storage(
+#         # firebase_firestore_instance.upload_file_to_storage(
 #         #     "ai_content_video/" + upload_file_path,
 #         #     upload_file_path
 #         # )

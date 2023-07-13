@@ -3,7 +3,7 @@ import os
 import dropbox
 import utility.file_utils as file_utils
 from dropbox.exceptions import AuthError
-from storage.firebase_storage import firestore_instance
+from storage.firebase_firestore import firestore_instance
 import appsecrets
 import requests
 
@@ -27,6 +27,7 @@ def initialize_dropbox():
             auth = (appsecrets.DROPBOX_APP_ID, appsecrets.DROPBOX_APP_SECRET)
             response = requests.post(url, headers=headers, data=data, auth=auth)
             response_json = response.json()
+            print("🚀 ~ file: dropbox_storage.py:30 ~ response_json:", response_json)
             REFRESH_TOKEN = response_json['refresh_token']
 
             firestore_instance.put_complete_access_token(

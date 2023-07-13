@@ -4,7 +4,7 @@ import meta_graph_api.meta_tokens as meta_tokens
 from domain.endpoint_definitions import make_api_call
 import media.image_creator as image_creator
 import appsecrets as appsecrets
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 import domain.url_shortener as url_shortener
 import storage.dropbox_storage as dropbox_storage
 import ai.gpt as gpt
@@ -124,19 +124,20 @@ def post_to_facebook(is_testmode=False):
         is_test = is_testmode
     )
 
-def schedule_fb_post( caption, image_query ):
+def schedule_fb_post( user_id, caption, image_query ):
     if (image_query is None or image_query == '' or caption is None or caption == ''):
         print('🔥 Error scheduling for FB')
         return ''
     
-    image_url = image_creator.get_unsplash_image_url(image_query, PostingPlatform.FACEBOOK)
+    # image_url = image_creator.get_unsplash_image_url(image_query, PostingPlatform.FACEBOOK)
     payload = {
         'media_type': 'IMAGE',
-        'url': image_url,
+        # 'url': image_url,
         'message': caption, 
         'published' : True
     }
     result = firestore_instance.upload_scheduled_post(
+        user_id,
         PostingPlatform.FACEBOOK, 
         payload
     )

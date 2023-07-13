@@ -28,7 +28,6 @@ import { AccounthubComponent } from './views/accounthub/accounthub.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LinkedinRedirectComponent } from './views/redirects/linkedinredirect.component';
 import { FacebookRedirectComponent } from './views/redirects/facebookredirect.component';
-import { InputTextModule } from 'primeng/inputtext';
 import { SplitterModule } from 'primeng/splitter';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
@@ -38,6 +37,9 @@ import { AccordionModule } from 'primeng/accordion';
 import { CreateContentComponent } from './views/createcontent/createcontent.component';
 import { StepsModule } from 'primeng/steps';
 import { ListboxModule } from 'primeng/listbox';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { DropdownModule } from 'primeng/dropdown';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -48,12 +50,12 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     firebase.auth.TwitterAuthProvider.PROVIDER_ID,
     {
       requireDisplayName: false,
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID
-    }
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    },
   ],
   tosUrl: '<your-tos-link>',
   privacyPolicyUrl: '<your-privacyPolicyUrl-link>',
-  credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
+  credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
 };
 
 @NgModule({
@@ -70,6 +72,8 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     CreateContentComponent,
   ],
   imports: [
+    DropdownModule,
+    InputTextareaModule,
     ListboxModule,
     StepsModule,
     AccordionModule,
@@ -91,16 +95,16 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     HammerModule,
     FormsModule,
     ReactiveFormsModule,
-    CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory }),
+    CalendarModule.forRoot({
+      provide: DateAdapter,
+      useFactory: adapterFactory,
+    }),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    FirebaseUIModule.forRoot(firebaseUiAuthConfig)
+    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
   ],
-  providers: [ 
-    ConfirmationService,
-    MessageService
-  ],
-  bootstrap: [AppComponent]
+  providers: [ConfirmationService, MessageService],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

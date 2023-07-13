@@ -2,7 +2,7 @@ import sys
 import os
 import tweepy
 import appsecrets
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 import json
 import ai.gpt as gpt
 import domain.url_shortener as url_shortener
@@ -133,17 +133,38 @@ def schedule_video_tweet( tweet, video_remote_url ):
         print('🔥 Error scheduling TW')
         return ''
     
+def schedule_image_tweet( user_id, tweet, image_query ):    
+    if (image_query != '' and tweet != ''):
+        image_url = image_creator.get_unsplash_image_url(
+            image_query,
+            PostingPlatform.TWITTER
+        )
+        payload = dict()
+        payload['tweet'] = tweet
+        payload['media_url'] = image_url
+        result = firestore_instance.upload_scheduled_post(
+            user_id,
+            PostingPlatform.TWITTER, 
+            payload
+        )
+        print(f'⏰ Tweet scheduled!\n{result}')  
+        return result
+    else:
+        print('🔥 Error scheduling TW')
+        return ''
 
-def schedule_tweet( tweet ):
+def schedule_tweet( user_id, tweet ):
     if (tweet != ''):
         payload = dict()
         payload['tweet'] = tweet
 
         result = firestore_instance.upload_scheduled_post(
+            user_id,
             PostingPlatform.TWITTER, 
             payload
         )
         print(f'⏰ Tweet scheduled!\n{result}') 
+        return result
     else:
         print('🔥 Error scheduling TW')
         return ''    

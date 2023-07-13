@@ -3,7 +3,7 @@ import os
 import json
 import requests
 import domain.linkedin_auth as li_auth
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 from domain.endpoint_definitions import make_api_call
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.

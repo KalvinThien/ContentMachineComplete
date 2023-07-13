@@ -25,13 +25,45 @@
   </ng-template>
 </div>
 
-<div *ngIf="currentContentStage == 'text'">
+<div *ngIf="currentContentStage == 'text'" class="flex flex-column">
   <ng-template pTemplate="header">
     <h3>Enter your topic and how often you would like it to post</h3>
   </ng-template>
-  <div style="display: flex; flex-direction: row;">
-    
-  </div>
+
+  <h3>Frequency</h3>
+  <p>Select how often you would like the content to be posted.</p>
+  <p-dropdown [options]="frequencyOptions" [(ngModel)]="selectedFrequency" optionLabel="label" optionValue="value"
+    placeholder="Select how often we should post" [style]="{'width':'100%'}" [virtualScroll]="true"
+    [virtualScrollItemSize]="frequencyOptions.length">
+    <ng-template pTemplate="selectedItem">
+      <div class="flex align-items-center gap-2" *ngIf="selectedFrequency">
+        <p>{{ selectedFrequency.value }}</p>
+      </div>
+    </ng-template>
+    <ng-template let-option pTemplate="item">
+      <div class="flex align-items-left gap-2">
+        <b>{{ option.title }}</b>
+        <p>{{ option.description }}</p>
+      </div>
+    </ng-template>
+  </p-dropdown>
+  <br />
+  <h3>Input Prompt</h3>
+  <p>Enter your prompt to create the content. The more detail you provide the better the content will
+    be and unique across multiple posts.</p>
+  <textarea rows="5" cols="30" pInputTextarea [autoResize]="true" [(ngModel)]="inputPrompt"
+    [style]="{'width': '100%'}"></textarea>
+
+  <h3>Image Prompt</h3>
+  <p>Enter your prompt to create the image content. Keep your idea concise to avoid getting random images.</p>
+  <input pInputTextarea [autoResize]="true" [(ngModel)]="imagePrompt" [style]="{'width': '100%'}" />
+  <br/>
+  <br/>
+  <p-footer>
+    <button pButton type="button" label="Create!" icon="pi pi-plus" styleClass="p-button-success" [loading]="createLoading"
+      [disabled]="selectedFrequency == undefined || inputPrompt == ''" (click)="onCreateSelected(selectedFrequency)">
+    </button>
+  </p-footer>
   <ng-template pTemplate="footer">
     <p-button icon="pi pi-cloud-upload" (click)="onAutoGenerateTopic()" label="Generate a topic for me"
       styleClass="p-button-rounded p-button-outlined "></p-button>

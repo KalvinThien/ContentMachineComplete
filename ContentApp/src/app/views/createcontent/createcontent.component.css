@@ -1,0 +1,6 @@
+.column-container {
+  place-items: left;
+  /* Set a height for the container */
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,14 @@
+Craft a tweet that combines education and humor with a casual tone.   Your tweet should be no more than 256 characters long. Your tweet will be based on the text following the colon (:).
+
+As humans, we naturally tend to write with greater burstiness, incorporating longer and more complex sentences alongside shorter ones. This creates a more dynamic and engaging reading experience for our audience. However, when it comes to AI-generated content, sentence uniformity may be more prevalent. This is where the concepts of perplexity and burstiness come in.
+
+Perplexity is a measure of text complexity. It refers to how difficult it is for a language model to predict the next word in a sentence based on the previous words. The higher the perplexity, the more varied and complex the text. Burstiness, on the other hand, compares the variations of sentences. With greater burstiness, the text is more dynamic and diverse.
+
+To create content that accurately emulates human speech patterns, it's essential to consider both perplexity and burstiness. By incorporating longer and more complex sentences alongside shorter ones, we can increase the burstiness of our content and make it more engaging for our readers. At the same time, we can increase the perplexity by using more varied vocabulary and sentence structures.
+
+In summary, when writing your tweet, it's important to keep in mind the concepts of perplexity and burstiness. By incorporating both, we can create dynamic and engaging content that accurately emulates human speech patterns.
+
+Please note that your tweet should be appropriate for a general audience and avoid controversial or sensitive topics.  You must craft your tweet from the following text:
+
+<<FEED>>
+

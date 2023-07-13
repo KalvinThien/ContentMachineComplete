@@ -5,7 +5,7 @@ import meta_graph_api.meta_tokens as meta_tokens
 from domain.endpoint_definitions import make_api_call
 import media.image_creator as image_creator
 from storage.dropbox_storage import DB_FOLDER_REFORMATTED, upload_file_for_sharing_url
-from storage.firebase_storage import firestore_instance, PostingPlatform
+from storage.firebase_firestore import firestore_instance, PostingPlatform
 import json
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
@@ -194,14 +194,17 @@ def schedule_ig_image_post( user_id, caption, image_query ):
 
     @returns: nothing
     '''
-    params = meta_tokens.fetch_personal_access_token(user_id) 
+    params = meta_tokens.create_core_request_object()
+    # params = meta_tokens.fetch_personal_access_token(user_id) 
     params['media_type'] = 'IMAGE' 
         
     params['media_url'] = image_creator.get_unsplash_image_url(image_query, PostingPlatform.INSTAGRAM) 
     params['caption'] = caption
         
     remote_media_obj = create_ig_media_object( params, False ) 
-    firestore_instance.upload_scheduled_post(user_id, PostingPlatform.INSTAGRAM, remote_media_obj)
+    result = firestore_instance.upload_scheduled_post(user_id, PostingPlatform.INSTAGRAM, remote_media_obj)
+    print('📦 IG upload scheduled post result' + str(result))
+    return result
 
 def monitor_ig_upload_status( ig_upload_response, post_params, publish_func ):	
     upload_container_id = ig_upload_response['json_data']['id'] # id of the media object that was created
