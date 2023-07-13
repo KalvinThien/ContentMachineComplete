@@ -6,16 +6,14 @@ import text_machine as text_machine
 import storage.firebase_storage as firebase_storage
 import os
 import sys
-import firebase_admin
-from firebase_admin import credentials
 
 # This code retrieves the current directory path and appends the '../src' directory to the sys.path, allowing access to modules in that directory.
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, "../src"))
 
 # Initialize the SDK with the service account credentials
-cred = credentials.Certificate(os.path.join(current_dir, 'legion-ai-content-machine-63f5b63456a6.json'))
-# firebase_admin.initialize_app(cred)
+# cred = credentials.Certificate(os.path.join(current_dir, 'legion-ai-content-machine-63f5b63456a6.json'))
+# # firebase_admin.initialize_app(cred)
 
 
 app = Flask(__name__)

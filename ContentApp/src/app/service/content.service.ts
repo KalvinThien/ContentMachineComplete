@@ -43,8 +43,7 @@ export class ContentService {
   };
 
   constructor(
-    private fireAuthRepo: FireAuthRepository,
-    private firestoreRepo: FirestoreRepository
+    private fireAuthRepo: FireAuthRepository
   ) {
     /** */
   }

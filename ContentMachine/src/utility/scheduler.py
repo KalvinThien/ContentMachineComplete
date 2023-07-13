@@ -69,6 +69,10 @@ def get_best_posting_time(
     posting_platform,
     last_posted_time = datetime.now()
 ):
+    if (last_posted_time is None):
+        print('🌴 Error: get_best_posting_time() last_posted_time is None')
+    print('🚀 ~ file: scheduler.py ~ line 79 ~ get_best_posting_time ~ posting_platform', posting_platform)
+    print('🚀 ~ file: scheduler.py ~ line 79 ~ get_best_posting_time ~ last_posted_time', last_posted_time)
     if type(last_posted_time) == str:
         formatted_iso = time_utils.convert_str_to_iso_format(last_posted_time)
         last_posted_time = datetime.fromisoformat(formatted_iso)
@@ -86,7 +90,7 @@ def get_best_posting_time(
     elif (posting_platform == firebase_firestore.PostingPlatform.LINKEDIN):
         times_array = linkedin_times_array    
     else:
-        '' #this will need to be updated for an error handling system
+        print('🔥 Error: get_best_posting_time() invalid platform')
 
     for str_posting_time in times_array:
         formatted_iso = time_utils.convert_str_to_iso_format(str_posting_time)
@@ -99,6 +103,7 @@ def get_best_posting_time(
         # we have found the time after what was last posted
         if (last_posted_time < potential_posting_time):
             str_posting_time = potential_posting_time.strftime("%Y-%m-%dT%H:%M:%S")
+            print("🌴 ~ file: scheduler.py:106 ~ str_posting_time:", str_posting_time)
             return str_posting_time
 
     # This means we need to go to the next day. Get the first posting time tomorrow   
