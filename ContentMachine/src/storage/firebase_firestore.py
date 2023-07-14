@@ -110,9 +110,7 @@ class FirebaseFirestore():
 
     @classmethod
     def get_latest_scheduled_datetime( self, user_id, platform ):
-        print("🚀 ~ file: firebase_firestore.py:113 ~ user_id, platform:", user_id, platform)
-        # prepper = self.firebaseRealtimeDatabase.child(user_id).child(platform.value).get().val()
-        # print(f'🌴 {platform} get_latest_scheduled_datetime() collection: {prepper}')
+        # need this to "warm up" the database. API has changed so this needs to be updated.
         self.firebaseRealtimeDatabase.child(user_id).child(platform.value).get().val()
         collection = self.firebaseRealtimeDatabase.child(user_id).child(platform.value).get().val()
 
@@ -152,17 +150,12 @@ class FirebaseFirestore():
 
     @classmethod
     def upload_scheduled_post( self, user_id, platform, payload ):
-        print(f'upload_scheduled_post() user_id: {user_id} platform: {platform} payload: {payload}')
-
         last_posted_time = self.get_latest_scheduled_datetime(user_id, platform)
-        print("🚀 ~ file: firebase_firestore.py:158 ~ last_posted_time:", last_posted_time)
 
         if (last_posted_time == '' or last_posted_time is None):
-            print("🌴 ~ file: firebase_firestore.py:160 ~ last_posted_time:", last_posted_time)
             future_publish_date = scheduler.get_best_posting_time(platform)
         else:
             future_publish_date = scheduler.get_best_posting_time(platform, last_posted_time)
-            print("🌴 ~ file: firebase_firestore.py:164 ~ future_publish_date:", future_publish_date)
 
         result = self.firebaseRealtimeDatabase.child(user_id).child(platform.value).update({
             future_publish_date: payload

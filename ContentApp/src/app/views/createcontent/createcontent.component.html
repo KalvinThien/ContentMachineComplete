@@ -25,6 +25,14 @@
   </ng-template>
 </div>
 
+<div *ngIf="currentContentStage == 'loading'" class="flex flex-column">
+  <ng-template pTemplate="header">
+    <h3>Content Machine at work</h3>
+  </ng-template>
+  <p>Please what while we generate your posts...</p>
+  <p-progressSpinner></p-progressSpinner>
+</div>
+
 <div *ngIf="currentContentStage == 'text'" class="flex flex-column">
   <ng-template pTemplate="header">
     <h3>Enter your topic and how often you would like it to post</h3>

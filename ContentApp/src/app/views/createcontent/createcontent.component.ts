@@ -13,6 +13,7 @@ export class CreateContentComponent implements OnInit {
     TEXT: 'text',
     VIDEO: 'video',
     YT_LINK: 'youtube_link',
+    LOADING: 'loading',
   };
   currentContentStage = this.contentCreationStage.INIT;
 
@@ -25,7 +26,6 @@ export class CreateContentComponent implements OnInit {
     { title: 'Aggressive', description: 'Every month', value: 'aggressive' },
   ];
   selectedFrequency?: { title: string; desctipion: string; value: string };
-  createLoading: boolean = false;
 
   constructor(
     private contentService: ContentService,
@@ -36,7 +36,6 @@ export class CreateContentComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentContentStage = this.contentCreationStage.INIT;
-    this.createLoading = false;
   }
 
   onCreateSelected(selectedOption: any) {
@@ -48,12 +47,12 @@ export class CreateContentComponent implements OnInit {
       });
       return;
     }
-    this.createLoading = true;
     this.contentService.createContent(
       this.inputPrompt,
       this.imagePrompt,
       selectedOption
     );
+    this.currentContentStage = this.contentCreationStage.LOADING;
   }
 
   generateWithText() {

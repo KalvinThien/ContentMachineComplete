@@ -3,19 +3,11 @@ import { ContentService } from 'src/app/service/content.service';
 import {
   Component,
   ChangeDetectionStrategy,
-  ViewChild,
-  TemplateRef,
   OnInit,
 } from '@angular/core';
 import {
-  startOfDay,
-  endOfDay,
-  subDays,
-  addDays,
-  endOfMonth,
   isSameDay,
   isSameMonth,
-  addHours,
 } from 'date-fns';
 import { Subject, map } from 'rxjs';
 import {
@@ -24,6 +16,8 @@ import {
   CalendarEventTimesChangedEvent,
   CalendarView,
 } from 'angular-calendar';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { CreateContentComponent } from '../createcontent/createcontent.component';
 
 @Component({
   selector: 'app-calendar',
@@ -33,13 +27,10 @@ import {
 })
 export class CalendarComponent implements OnInit {
 
-  showContentModal = false;
   showEventModal = false;
 
   view: CalendarView = CalendarView.Month;
-
   CalendarView = CalendarView;
-
   viewDate: Date = new Date();
 
   modalData?: {
@@ -47,6 +38,10 @@ export class CalendarComponent implements OnInit {
     event: CalendarEvent;
   };
 
+  refresh = new Subject<void>();
+  activeDayIsOpen: boolean = false;
+  events: CalendarEvent[] = [ /** */ ];
+  
   actions: CalendarEventAction[] = [
     // {
     //   label: '<i class="fas fa-fw fa-pencil-alt"></i>',
@@ -65,76 +60,42 @@ export class CalendarComponent implements OnInit {
     // },
   ];
 
-  refresh = new Subject<void>();
-
-  events: CalendarEvent[] = [
-    // {
-    //   start: subDays(startOfDay(new Date()), 1),
-    //   end: addDays(new Date(), 1),
-    //   title: 'A 3 day event',
-    //   color: { ...colors['red'] },
-    //   actions: this.actions,
-    //   allDay: true,
-    //   resizable: {
-    //     beforeStart: true,
-    //     afterEnd: true,
-    //   },
-    //   draggable: true,
-    // },
-    // {
-    //   start: startOfDay(new Date()),
-    //   title: 'An event with no end date',
-    //   color: { ...colors['yellow'] },
-    //   actions: this.actions,
-    // },
-    // {
-    //   start: subDays(endOfMonth(new Date()), 3),
-    //   end: addDays(endOfMonth(new Date()), 3),
-    //   title: 'A long event that spans 2 months',
-    //   color: { ...colors['blue'] },
-    //   allDay: true,
-    // },
-    // {
-    //   start: addHours(startOfDay(new Date()), 2),
-    //   end: addHours(new Date(), 2),
-    //   title: 'A draggable and resizable event',
-    //   color: { ...colors['yellow'] },
-    //   actions: this.actions,
-    //   resizable: {
-    //     beforeStart: true,
-    //     afterEnd: true,
-    //   },
-    //   draggable: true,
-    // },
-  ];
-
-  activeDayIsOpen: boolean = false;
+  private dialogRef?: DynamicDialogRef;
 
   constructor(
     private contentService: ContentService,
-    private messageService: MessageService 
+    private messageService: MessageService,
+    public dialogService: DialogService 
   ) {
     /** */
   }
 
   ngOnInit(): void {
     this.contentService.calendarEventsObservable$.subscribe((events) => {
-      console.log("🚀 ~ file: calendar.component.ts:129 ~ CalendarComponent ~ ).subscribe ~ events:", events)
       this.events = events;
-      this.showContentModal = false;
+      this.dialogRef?.close(); 
+
+      if (events.length == 0) {
+        this.messageService.add({
+          severity: 'warning',
+          summary: 'Something Went Wrong',
+          detail: 'We were unable to schedule your content. Please try again.',
+        });
+      }
+
     });
     this.contentService.errorObservable$.subscribe((error) => {
+      this.dialogRef?.close(); 
       this.messageService.add({
         severity: 'error',
         summary: 'Oops',
         detail: error,
       });
-      this.showContentModal = false;
     });
   }
 
   onCreateClick(): void {
-    this.showContentModal = true;
+    this.dialogRef = this.dialogService.open(CreateContentComponent, { width: '75%' })
   }
 
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {

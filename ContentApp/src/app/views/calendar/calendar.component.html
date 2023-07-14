@@ -7,18 +7,23 @@
   </div>
   <div class="col-6">
     <div class="row text-center" style="justify-content: space-between; align-items: center;">
-      <span class="p-buttonset"  style="padding: 0.5rem;">
-        <button pButton pRipple icon="pi pi-angle-left" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="closeOpenMonthViewDay()"></button>
+      <span class="p-buttonset" style="padding: 0.5rem;">
+        <button pButton pRipple icon="pi pi-angle-left" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
+          (viewDateChange)="closeOpenMonthViewDay()"></button>
         <button pButton pRipple label="Today" mwlCalendarToday [(viewDate)]="viewDate"></button>
-        <button pButton pRipple icon="pi pi-angle-right" iconPos="right" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="closeOpenMonthViewDay()"></button>
+        <button pButton pRipple icon="pi pi-angle-right" iconPos="right" mwlCalendarNextView [view]="view"
+          [(viewDate)]="viewDate" (viewDateChange)="closeOpenMonthViewDay()"></button>
       </span>
       <div class="col-md-4">
         <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
       </div>
-      <span class="p-buttonset"  style="padding: 0.5rem;">
-        <button pButton pRipple label="Month" (click)="setView(CalendarView.Month)" [class.active]="view === CalendarView.Month"></button>
-        <button pButton pRipple label="Week" (click)="setView(CalendarView.Week)" [class.active]="view === CalendarView.Week"></button>
-        <button pButton pRipple label="Day" (click)="setView(CalendarView.Day)" [class.active]="view === CalendarView.Day"></button>
+      <span class="p-buttonset" style="padding: 0.5rem;">
+        <button pButton pRipple label="Month" (click)="setView(CalendarView.Month)"
+          [class.active]="view === CalendarView.Month"></button>
+        <button pButton pRipple label="Week" (click)="setView(CalendarView.Week)"
+          [class.active]="view === CalendarView.Week"></button>
+        <button pButton pRipple label="Day" (click)="setView(CalendarView.Day)"
+          [class.active]="view === CalendarView.Day"></button>
       </span>
     </div>
     <br />
@@ -27,33 +32,46 @@
         [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen" (dayClicked)="dayClicked($event.day)"
         (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
       </mwl-calendar-month-view>
-      <mwl-calendar-week-view *ngSwitchCase="CalendarView.Week" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
-        (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+      <mwl-calendar-week-view *ngSwitchCase="CalendarView.Week" [viewDate]="viewDate" [events]="events"
+        [refresh]="refresh" (eventClicked)="handleEvent('Clicked', $event.event)"
+        (eventTimesChanged)="eventTimesChanged($event)">
       </mwl-calendar-week-view>
-      <mwl-calendar-day-view *ngSwitchCase="CalendarView.Day" [viewDate]="viewDate" [events]="events" [refresh]="refresh"
-        (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+      <mwl-calendar-day-view *ngSwitchCase="CalendarView.Day" [viewDate]="viewDate" [events]="events"
+        [refresh]="refresh" (eventClicked)="handleEvent('Clicked', $event.event)"
+        (eventTimesChanged)="eventTimesChanged($event)">
       </mwl-calendar-day-view>
     </div>
   </div>
 </div>
-<!-- content creation from source -->
-<p-dialog header="Header" [(visible)]="showContentModal" [modal]="true" [style]="{ width: '75vw' }" [draggable]="false"
+<!-- create content modal -->
+<p-dialog header="Header" [modal]="true" [style]="{ width: '75vw' }" [draggable]="false"
   [resizable]="false">
   <app-createcontent></app-createcontent>
 </p-dialog>
-<!-- created event popup -->
+<!-- calendar event modal -->
 <p-dialog header="Header" [(visible)]="showEventModal" [style]="{ width: '50vw' }">
-  <ng-template pTemplate="header">
-    <span class="text-xl font-bold">Scheduled Content</span>
-  </ng-template>
-  <div class="modal-body">
-    <div>
-      Action:
-      <pre>{{ modalData?.action }}</pre>
-    </div>
-    <div>
-      Event:
-      <pre>{{ modalData?.event | json }}</pre>
+  <div class="col-12">
+    <div class="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4">
+      <img class="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round"
+        [src]="modalData?.event?.meta.media_url" [alt]="modalData?.event?.title" />
+      <div
+        class="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
+        <div class="flex flex-column align-items-center sm:align-items-start gap-3">
+          <div class="text-2xl font-bold text-900">{{ modalData?.event?.title }}</div>
+          <div class="flex align-items-center gap-3">
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-tag"></i>
+              <span class="font-semibold">{{ modalData?.event?.meta.post_type }}</span>
+            </span>
+            <!-- <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product)"></p-tag> -->
+          </div>
+        </div>
+        <!-- <div class="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
+          <span class="text-2xl font-semibold">{{'$'+ product.price }}</span>
+          <button pButton icon="pi pi-shopping-cart" class="md:align-self-end mb-2 p-button-rounded"
+            [disabled]="product.inventoryStatus === 'OUTOFSTOCK'"></button>
+        </div> -->
+      </div>
     </div>
   </div>
   <ng-template pTemplate="footer">
