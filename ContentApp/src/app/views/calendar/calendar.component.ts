@@ -73,7 +73,7 @@ export class CalendarComponent implements OnInit {
   ngOnInit(): void {
     this.contentService.calendarEventsObservable$.subscribe((events) => {
       this.events = events;
-      this.dialogRef?.close(); 
+      // this.dialogRef?.close(); 
 
       if (events.length == 0) {
         this.messageService.add({
@@ -82,8 +82,8 @@ export class CalendarComponent implements OnInit {
           detail: 'We were unable to schedule your content. Please try again.',
         });
       }
-
     });
+
     this.contentService.errorObservable$.subscribe((error) => {
       this.dialogRef?.close(); 
       this.messageService.add({
@@ -92,6 +92,8 @@ export class CalendarComponent implements OnInit {
         detail: error,
       });
     });
+
+    this.contentService.getAllEvents();
   }
 
   onCreateClick(): void {

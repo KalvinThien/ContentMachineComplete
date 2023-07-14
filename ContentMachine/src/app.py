@@ -2,8 +2,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import appsecrets
-import text_machine as text_machine
+import machine_text
 import storage.firebase_storage as firebase_storage
+import machine_core
 import os
 import sys
 
@@ -64,7 +65,7 @@ def facebook_callback():
         print("🚀 ~ error:", str(e))
         return jsonify({ 'Authentication failed.', 500 })
 
-@app.route('/api/schedule-text-posts', methods=['POST'])
+@app.route('/api/text-posts', methods=['POST'])
 def text_to_content():
     data = request.json
     print("🚀 ~ file: app.py:58 ~ data:", data)
@@ -80,7 +81,18 @@ def text_to_content():
         firebase_storage.downoad_input_prompts('input_prompts', os.path.join('src', 'input_prompts'))
         print('🔺 downloaded prompts')
     
-    returnResult = text_machine.run_text_machine(userUuid, content, image, frequency)
+    returnResult = machine_text.run_text_machine(userUuid, content, image, frequency)
+
+    return jsonify(returnResult)
+
+@app.route('/api/posts/<userUuid>', methods=['GET'])
+def get_all_posts():
+    userUuid = request.view_args['section']
+
+    if (userUuid is None):
+        return jsonify(result=False)
+    
+    returnResult = machine_core.get_all_user_posts(userUuid)
 
     return jsonify(returnResult)
 

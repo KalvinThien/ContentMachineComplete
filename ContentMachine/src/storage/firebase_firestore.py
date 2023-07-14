@@ -189,6 +189,16 @@ class FirebaseFirestore():
             return upload_result
         else:
             return f'{platform.value} time not within posting window' 
+        
+    def get_all_posts( self, user_id ):
+        # need this to "warm up" the database. API has changed so this needs to be updated.
+        # self.firebaseRealtimeDatabase.child(user_id).get().val()
+        collection = self.firebaseRealtimeDatabase.child(user_id).get().val()
+
+        if (collection is None):
+            print('collection is none')
+        
+        return collection
 
 #static instances
 firestore_instance = FirebaseFirestore()

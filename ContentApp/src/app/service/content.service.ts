@@ -9,12 +9,12 @@ import { EventColor } from 'calendar-utils';
   providedIn: 'root',
 })
 export class ContentService {
-
   private errorSubject = new Subject<string>();
   errorObservable$ = this.errorSubject.asObservable();
 
   private calendarEventsSubject = new Subject<CalendarEvent[]>();
-  calendarEventsObservable$: Observable<CalendarEvent[]> = this.calendarEventsSubject.asObservable();
+  calendarEventsObservable$: Observable<CalendarEvent[]> =
+    this.calendarEventsSubject.asObservable();
 
   colors: Record<string, EventColor> = {
     facebook: {
@@ -67,30 +67,55 @@ export class ContentService {
       image: imageValue,
       frequency: frequencyValue,
     };
-      this.calendarEventsSubject.next([]);
-      return;
 
-      this.contentRepo.createBulkContent(inputData).subscribe({
-        next: (postResponse: {}[]) => {
-
-          const calendarEvents: CalendarEvent[] = [];
-          for (const post of postResponse) {
-            let event = this.convert_post_to_event(post);
-            console.log('🚀 ~ file: content.service.ts:88 ~ ContentService ~ .then ~ event:', event);
-            calendarEvents.push(event);
-          }
-          this.calendarEventsSubject.next(calendarEvents);
-        },
-        error: (error) => {
-          console.log("🔥 ~ file: content.service.ts:75 ~ ContentService ~ this.contentRepo.createBulkContent ~ error:", error)
-          this.errorSubject.next(error);
-        }
-      })
+    this.contentRepo.createBulkTextContent(inputData).subscribe({
+      next: (postResponse: {}[]) => {
+        this.calendarEventsSubject.next(this.postsToEvents(postResponse));
+      },
+      error: (error) => {
+        console.log(
+          '🔥 ~ file: content.service.ts:75 ~ ContentService ~ this.contentRepo.createBulkContent ~ error:',
+          error
+        );
+        this.errorSubject.next(error);
+      },
+    });
   }
 
-  convert_post_to_event(
-    post: any
-  ): CalendarEvent {
+  getAllEvents() {
+    const userId = this.fireAuthRepo.currentSessionUser?.uid;
+    if (userId === undefined || userId === '') {
+      this.errorSubject.next('User is not logged in');
+      return;
+    }
+    this.contentRepo.getAllContent(userId).subscribe({
+      next: (postResponse: {}[]) => {
+        this.calendarEventsSubject.next(this.postsToEvents(postResponse));
+      },
+      error: (error) => {
+        console.log(
+          '🔥 ~ file: content.service.ts:75 ~ ContentService ~ this.contentRepo.createBulkContent ~ error:',
+          error
+        );
+        this.errorSubject.next(error);
+      },
+    });
+  }
+
+  postsToEvents(postResponse: {}[]): CalendarEvent[] {
+    const calendarEvents: CalendarEvent[] = [];
+    for (const post of postResponse) {
+      let event = this.convert_post_to_event(post);
+      console.log(
+        '🚀 ~ file: content.service.ts:88 ~ ContentService ~ .then ~ event:',
+        event
+      );
+      calendarEvents.push(event);
+    }
+    return calendarEvents
+  }
+
+  convert_post_to_event(post: any): CalendarEvent {
     console.log('🚀 ~ file: content.service.ts:84 ~ post:', post);
 
     switch (post.post_type) {
@@ -158,7 +183,7 @@ export class ContentService {
         secondary: post.accent_color,
       },
       meta: {
-        ...post
+        ...post,
       },
     };
   }
