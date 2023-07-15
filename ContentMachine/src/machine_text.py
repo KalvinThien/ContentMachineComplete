@@ -73,7 +73,7 @@ def run_text_machine( user_uuid, content_summary, content_image, frequency ):
         'facebook': utils.randomize_array(facebookPosts),
         'instagram': utils.randomize_array(instagramPosts),
         'blog': utils.randomize_array(blogPosts),
-        'tweet': utils.randomize_array(tweetPosts),
+        'twitter': utils.randomize_array(tweetPosts),
       }
           
       print('Finished as SUCCESS')

@@ -41,6 +41,7 @@ import { ListboxModule } from 'primeng/listbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { DropdownModule } from 'primeng/dropdown';
+import { SelectButton, SelectButtonModule } from 'primeng/selectbutton';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -73,6 +74,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     CreateContentComponent
   ],
   imports: [
+    SelectButtonModule,
     DropdownModule,
     InputTextareaModule,
     ListboxModule,

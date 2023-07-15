@@ -193,12 +193,16 @@ class FirebaseFirestore():
     def get_all_posts( self, user_id ):
         # need this to "warm up" the database. API has changed so this needs to be updated.
         # self.firebaseRealtimeDatabase.child(user_id).get().val()
-        collection = self.firebaseRealtimeDatabase.child(user_id).get().val()
+        collectionDict = self.firebaseRealtimeDatabase.child(user_id).get().val()
 
-        if (collection is None):
+        if (collectionDict is None):
             print('collection is none')
-        
-        return collection
+
+        posts = {}
+        for key, value in collectionDict.items():
+            posts[key] = value
+
+        return posts
 
 #static instances
 firestore_instance = FirebaseFirestore()

@@ -23,11 +23,13 @@ export class YoutubeAuthRepository {
     'https://www.googleapis.com/auth/youtube.readonly',
   ]
 
-  constructor() { this.initTokenClient(); }
+  constructor() { /** */ }
 
   getRequestToken() { this.identityTokenClient.requestAccessToken(); }
 
   initTokenClient() {
+
+    this.initTokenClient();
     //@ts-ignore
     this.identityTokenClient = google.accounts.oauth2.initTokenClient({
         client_id: YOUTUBE_CLIENT_ID,

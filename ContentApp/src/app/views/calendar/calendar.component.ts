@@ -4,6 +4,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   OnInit,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   isSameDay,
@@ -18,6 +19,7 @@ import {
 } from 'angular-calendar';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { CreateContentComponent } from '../createcontent/createcontent.component';
+import { ref } from 'firebase/storage';
 
 @Component({
   selector: 'app-calendar',
@@ -71,20 +73,15 @@ export class CalendarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.contentService.calendarEventsObservable$.subscribe((events) => {
-      this.events = events;
-      // this.dialogRef?.close(); 
-
-      if (events.length == 0) {
-        this.messageService.add({
-          severity: 'warning',
-          summary: 'Something Went Wrong',
-          detail: 'We were unable to schedule your content. Please try again.',
-        });
-      }
+    this.contentService.calendarCompleteObservable$.subscribe((newEvents) => {
+      this.dialogRef?.close();
+      
+      this.events = newEvents;
+      this.refresh.next();
     });
-
     this.contentService.errorObservable$.subscribe((error) => {
+      console.log("🚀 ~ file: calendar.component.ts:88 ~ CalendarComponent ~ this.contentService.errorObservable$.subscribe ~ error:", error)
+      
       this.dialogRef?.close(); 
       this.messageService.add({
         severity: 'error',

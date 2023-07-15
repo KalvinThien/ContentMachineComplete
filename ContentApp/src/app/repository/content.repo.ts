@@ -1,7 +1,6 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import axios, { AxiosResponse } from 'axios';
 import { Observable, Subject, concatMap, from, map, of, tap } from 'rxjs';
-import { FacebookPage } from "../model/facebookpage.model";
 
 const contentMachineUrl = 'http://localhost:8000/api';
 
@@ -16,16 +15,7 @@ export class ContentRepository {
       tap((response: AxiosResponse<any, any>) => {
         console.log('Response:', response.data);
       }),
-      concatMap((response: AxiosResponse<any, any>) => {
-        if (response === undefined || response.data.length === 0) {
-          throw new Error(
-            'response === undefined || response.data.length === 0'
-          );
-        }
-        let postBundles = this.translateResponseToPosts(response.data);
-        this.newlyCreatedPostData = postBundles;
-        return of(postBundles);
-      })
+      concatMap((response: AxiosResponse<any, any>) => this.getPostList(response))
     );
   }
 
@@ -39,54 +29,33 @@ export class ContentRepository {
       tap((response: AxiosResponse<any, any>) => {
         console.log('Response:', response.data);
       }),
-      concatMap((response: AxiosResponse<any, any>) => {
-        if (response === undefined || response.data.length === 0) {
-          throw new Error(
-            'response === undefined || response.data.length === 0'
-          );
-        }
-        let postBundles = this.translateResponseToPosts(response.data);
-        this.newlyCreatedPostData = postBundles;
-        return of(postBundles);
-      })
+      concatMap((response: AxiosResponse<any, any>) => this.getPostList(response))
     );
   }
 
-  private translateResponseToPosts(responseData: AxiosResponse<any, any>): {}[] {
-    const posts: {}[] = [];
+  private getPostList(response: AxiosResponse<any, any>) {
+    if (response === null || response == undefined || response.data === null) {
+      return of([]);
+    } else {
+      let postBundles = this.mapResponseToPosts(response.data);
+      this.newlyCreatedPostData = postBundles;
+      return of(postBundles);
+    }
+  }
 
-    // the post response at this point is { blog: {}[], etc }
+  private mapResponseToPosts(responseData: AxiosResponse<any, any>): {}[] {
+    const postsList: {}[] = [];
+
     for (const [post_type, posts] of Object.entries(responseData)) {
-      console.log(
-        '🚀 ~ file: content.repo.ts:30 ~ ContentRepository ~ concatMap ~ post_type, posts:',
-        post_type,
-        posts
-      );
-      for (const post of posts as {}[]) {
-        console.log(
-          '🚀 ~ file: content.repo.ts:32 ~ ContentRepository ~ concatMap ~ post:',
-          post
-        );
-        for (const [key, post_data] of Object.entries(post)) {
-          console.log(
-            '🚀 ~ file: content.repo.ts:33 ~ ContentRepository ~ concatMap ~ key, post_data:',
-            key,
-            post_data
-          );
-
-          let currPostBundle: {} = {
-            post_type: post_type,
-            post_date: key,
-            ...(post_data as {}),
-          };
-          console.log(
-            '🚀 ~ file: content.repo.ts:41 ~ ContentRepository ~ concatMap ~ currPostBundle:',
-            currPostBundle
-          );
-          posts.push(currPostBundle);
-        }
+      for (const [date_key, post_data] of Object.entries(posts)) {
+        let currPostBundle: {} = {
+          post_type: post_type,
+          post_date: date_key,
+          ...(post_data as {}),
+        };
+        postsList.push(currPostBundle);
       }
     }
-    return posts;
+    return postsList;
   }
 }

@@ -82,18 +82,15 @@ def text_to_content():
         print('🔺 downloaded prompts')
     
     returnResult = machine_text.run_text_machine(userUuid, content, image, frequency)
-
     return jsonify(returnResult)
 
 @app.route('/api/posts/<userUuid>', methods=['GET'])
-def get_all_posts():
-    userUuid = request.view_args['section']
+def get_all_posts(userUuid):
 
     if (userUuid is None):
         return jsonify(result=False)
     
     returnResult = machine_core.get_all_user_posts(userUuid)
-
     return jsonify(returnResult)
 
 if __name__ == '__main__':

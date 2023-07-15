@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import axios, { AxiosResponse } from 'axios';
 import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, concat, concatMap } from 'rxjs';
 import { CalendarEvent } from 'angular-calendar';
 import { ContentRepository } from '../repository/content.repo';
 import { EventColor } from 'calendar-utils';
@@ -12,9 +12,8 @@ export class ContentService {
   private errorSubject = new Subject<string>();
   errorObservable$ = this.errorSubject.asObservable();
 
-  private calendarEventsSubject = new Subject<CalendarEvent[]>();
-  calendarEventsObservable$: Observable<CalendarEvent[]> =
-    this.calendarEventsSubject.asObservable();
+  private calendarCompleteSubject = new Subject<CalendarEvent[]>();
+  calendarCompleteObservable$: Observable<CalendarEvent[]> = this.calendarCompleteSubject.asObservable();
 
   colors: Record<string, EventColor> = {
     facebook: {
@@ -70,54 +69,45 @@ export class ContentService {
 
     this.contentRepo.createBulkTextContent(inputData).subscribe({
       next: (postResponse: {}[]) => {
-        this.calendarEventsSubject.next(this.postsToEvents(postResponse));
+        console.log("🚀 ~ file: content.service.ts:72 ~ ContentService ~ this.contentRepo.createBulkTextContent ~ postResponse:", postResponse)
+        if (postResponse.length > 0) {
+          this.getAllEvents();
+        } else {
+          this.errorSubject.next('No posts were created');
+        }
       },
       error: (error) => {
-        console.log(
-          '🔥 ~ file: content.service.ts:75 ~ ContentService ~ this.contentRepo.createBulkContent ~ error:',
-          error
-        );
         this.errorSubject.next(error);
       },
     });
   }
 
   getAllEvents() {
-    const userId = this.fireAuthRepo.currentSessionUser?.uid;
-    if (userId === undefined || userId === '') {
-      this.errorSubject.next('User is not logged in');
-      return;
+    if (this.fireAuthRepo.currentSessionUser == null || this.fireAuthRepo.currentSessionUser == undefined) {
+      this.fireAuthRepo.getUserAuthObservable().pipe(
+        concatMap((user) => this.contentRepo.getAllContent(user.uid)),
+      ).subscribe({
+        next: (postResponse: {}[]) => { this.calendarCompleteSubject.next(this.postsToEvents(postResponse)); },
+        error: (error) => { this.errorSubject.next(error); }
+      });
+    } else {
+      this.contentRepo.getAllContent(this.fireAuthRepo.currentSessionUser.uid).subscribe({
+        next: (postResponse: {}[]) => { this.calendarCompleteSubject.next(this.postsToEvents(postResponse)); },
+        error: (error) => { this.errorSubject.next(error); }
+      });
     }
-    this.contentRepo.getAllContent(userId).subscribe({
-      next: (postResponse: {}[]) => {
-        this.calendarEventsSubject.next(this.postsToEvents(postResponse));
-      },
-      error: (error) => {
-        console.log(
-          '🔥 ~ file: content.service.ts:75 ~ ContentService ~ this.contentRepo.createBulkContent ~ error:',
-          error
-        );
-        this.errorSubject.next(error);
-      },
-    });
   }
 
   postsToEvents(postResponse: {}[]): CalendarEvent[] {
     const calendarEvents: CalendarEvent[] = [];
     for (const post of postResponse) {
       let event = this.convert_post_to_event(post);
-      console.log(
-        '🚀 ~ file: content.service.ts:88 ~ ContentService ~ .then ~ event:',
-        event
-      );
       calendarEvents.push(event);
     }
     return calendarEvents
   }
 
   convert_post_to_event(post: any): CalendarEvent {
-    console.log('🚀 ~ file: content.service.ts:84 ~ post:', post);
-
     switch (post.post_type) {
       case 'facebook':
         post = {
@@ -131,7 +121,7 @@ export class ContentService {
           accent_color: this.colors['facebook'].secondary,
         };
         break;
-      case 'tweet':
+      case 'twitter':
         let image_media = 'NONE';
         if (post.media_url !== '') {
           image_media = 'IMAGE';

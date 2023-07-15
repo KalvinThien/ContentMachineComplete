@@ -26,9 +26,6 @@
 </div>
 
 <div *ngIf="currentContentStage == 'loading'" class="flex flex-column">
-  <ng-template pTemplate="header">
-    <h3>Content Machine at work</h3>
-  </ng-template>
   <p>Please what while we generate your posts...</p>
   <p-progressSpinner></p-progressSpinner>
 </div>
@@ -40,21 +37,7 @@
 
   <h3>Frequency</h3>
   <p>Select how often you would like the content to be posted.</p>
-  <p-dropdown [options]="frequencyOptions" [(ngModel)]="selectedFrequency" optionLabel="label" optionValue="value"
-    placeholder="Select how often we should post" [style]="{'width':'100%'}" [virtualScroll]="true"
-    [virtualScrollItemSize]="frequencyOptions.length">
-    <ng-template pTemplate="selectedItem">
-      <div class="flex align-items-center gap-2" *ngIf="selectedFrequency">
-        <p>{{ selectedFrequency.value }}</p>
-      </div>
-    </ng-template>
-    <ng-template let-option pTemplate="item">
-      <div class="flex align-items-left gap-2">
-        <b>{{ option.title }}</b>
-        <p>{{ option.description }}</p>
-      </div>
-    </ng-template>
-  </p-dropdown>
+  <p-selectButton [options]="frequencyOptions" [(ngModel)]="selectedFrequency" [multiple]="false" optionLabel="title" optionValue="value"></p-selectButton>
   <br />
   <h3>Input Prompt</h3>
   <p>Enter your prompt to create the content. The more detail you provide the better the content will
