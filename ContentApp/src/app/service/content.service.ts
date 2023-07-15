@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import axios, { AxiosResponse } from 'axios';
 import { FireAuthRepository } from '../repository/firebase/fireauth.repo';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, concat, concatMap } from 'rxjs';
 import { CalendarEvent } from 'angular-calendar';
-import { FirestoreRepository } from '../repository/firebase/firestore.repo';
+import { ContentRepository } from '../repository/content.repo';
 import { EventColor } from 'calendar-utils';
 @Injectable({
   providedIn: 'root',
 })
 export class ContentService {
   private errorSubject = new Subject<string>();
-  private calendarEventsSubject = new Subject<CalendarEvent[]>();
-
   errorObservable$ = this.errorSubject.asObservable();
-  calendarEventsObservable$: Observable<CalendarEvent[]> = this.calendarEventsSubject.asObservable();
+
+  private calendarCompleteSubject = new Subject<CalendarEvent[]>();
+  calendarCompleteObservable$: Observable<CalendarEvent[]> = this.calendarCompleteSubject.asObservable();
 
   colors: Record<string, EventColor> = {
     facebook: {
@@ -44,7 +44,7 @@ export class ContentService {
 
   constructor(
     private fireAuthRepo: FireAuthRepository,
-    private firestoreRepo: FirestoreRepository
+    private contentRepo: ContentRepository
   ) {
     /** */
   }
@@ -67,51 +67,51 @@ export class ContentService {
       frequency: frequencyValue,
     };
 
-    axios
-      .post('http://localhost:8000/api/schedule-text-posts', inputData)
-      .then((response) => {
-        // Handle the response from the Flask API
-        console.log('Response:', response.data);
-
-        const calendarEvents: CalendarEvent[] = [];
-
-        if (response === undefined || response.data.length === 0) {
-          this.errorSubject.next('Something went wrong.');
-          return;
+    this.contentRepo.createBulkTextContent(inputData).subscribe({
+      next: (postResponse: {}[]) => {
+        console.log("🚀 ~ file: content.service.ts:72 ~ ContentService ~ this.contentRepo.createBulkTextContent ~ postResponse:", postResponse)
+        if (postResponse.length > 0) {
+          this.getAllEvents();
+        } else {
+          this.errorSubject.next('No posts were created');
         }
-
-        for (const [post_type, post] of Object.entries(response.data)) {
-          console.log(post_type, post);
-          for (const [key, post_data] of Object.entries(post as any)) {
-            console.log("🚀 ~ file: content.service.ts:86 ~ ContentService ~ .then ~ post_data:", post_data)
-            const key = Object.keys(post_data as any)[0]; // Get the first key in the object
-            const value = (post_data as any)[key];
-            let event = this.convert_post_to_event(post_type, key, value);
-            console.log("🚀 ~ file: content.service.ts:88 ~ ContentService ~ .then ~ event:", event)
-            calendarEvents.push(event);
-          };
-        }
-        this.calendarEventsSubject.next(calendarEvents);
-        console.log("🚀 ~ file: content.service.ts:93 ~ ContentService ~ .then ~ calendarEvents:", calendarEvents)
-      })
-      .catch((error) => {
-        // Handle any errors that occurred during the request
-        console.error('Error:', error);
-      });
+      },
+      error: (error) => {
+        this.errorSubject.next(error);
+      },
+    });
   }
 
-  convert_post_to_event(
-    post_type: string,
-    iso_date: string,
-    post: any
-  ): CalendarEvent {
-    console.log('🚀 ~ file: content.service.ts:84 ~ post:', post);
-    console.log('🚀 ~ file: content.service.ts:84 ~ iso_date:', iso_date);
-    console.log('🚀 ~ file: content.service.ts:84 ~ post_type:', post_type);
+  getAllEvents() {
+    if (this.fireAuthRepo.currentSessionUser == null || this.fireAuthRepo.currentSessionUser == undefined) {
+      this.fireAuthRepo.getUserAuthObservable().pipe(
+        concatMap((user) => this.contentRepo.getAllContent(user.uid)),
+      ).subscribe({
+        next: (postResponse: {}[]) => { this.calendarCompleteSubject.next(this.postsToEvents(postResponse)); },
+        error: (error) => { this.errorSubject.next(error); }
+      });
+    } else {
+      this.contentRepo.getAllContent(this.fireAuthRepo.currentSessionUser.uid).subscribe({
+        next: (postResponse: {}[]) => { this.calendarCompleteSubject.next(this.postsToEvents(postResponse)); },
+        error: (error) => { this.errorSubject.next(error); }
+      });
+    }
+  }
 
-    switch (post_type) {
+  postsToEvents(postResponse: {}[]): CalendarEvent[] {
+    const calendarEvents: CalendarEvent[] = [];
+    for (const post of postResponse) {
+      let event = this.convert_post_to_event(post);
+      calendarEvents.push(event);
+    }
+    return calendarEvents
+  }
+
+  convert_post_to_event(post: any): CalendarEvent {
+    switch (post.post_type) {
       case 'facebook':
         post = {
+          post_date: post.post_date,
           title: post.message.slice(0, 12),
           content: post.message,
           image_url: post.url,
@@ -121,12 +121,13 @@ export class ContentService {
           accent_color: this.colors['facebook'].secondary,
         };
         break;
-      case 'tweet':
+      case 'twitter':
         let image_media = 'NONE';
         if (post.media_url !== '') {
           image_media = 'IMAGE';
         }
         post = {
+          post_date: post.post_date,
           title: post.tweet.slice(0, 12),
           content: post.tweet,
           image_url: post.media_url,
@@ -138,6 +139,7 @@ export class ContentService {
         break;
       case 'instagram':
         post = {
+          post_date: post.post_date,
           title: post.caption.slice(0, 12),
           content: post.caption,
           image_url: post.image_url,
@@ -149,6 +151,7 @@ export class ContentService {
         break;
       case 'blog':
         post = {
+          post_date: post.post_date,
           title: post.title,
           content: post.content,
           image_url: '',
@@ -161,19 +164,21 @@ export class ContentService {
       default:
         break;
     }
-    const event: CalendarEvent = {
-      start: new Date(iso_date),
+
+    return {
+      start: new Date(post.post_date),
       title: post.title,
       color: {
         primary: post.color,
         secondary: post.accent_color,
       },
       meta: {
-        post_type: post_type,
-        post_date: iso_date,
-        post_data: post,
-      }
+        ...post,
+      },
     };
-    return event;
+  }
+
+  getPostData() {
+    return this.contentRepo.newlyCreatedPostData;
   }
 }

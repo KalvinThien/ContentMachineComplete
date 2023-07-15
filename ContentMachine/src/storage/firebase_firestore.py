@@ -110,21 +110,20 @@ class FirebaseFirestore():
 
     @classmethod
     def get_latest_scheduled_datetime( self, user_id, platform ):
-
-        collection = self.firebaseRealtimeDatabase.child(user_id).child(platform.value).get().each()
+        # need this to "warm up" the database. API has changed so this needs to be updated.
+        self.firebaseRealtimeDatabase.child(user_id).child(platform.value).get().val()
+        collection = self.firebaseRealtimeDatabase.child(user_id).child(platform.value).get().val()
 
         if (collection is None):
             return scheduler.get_best_posting_time(platform)
         
         if (len(collection) > 0):
-            latest_scheduled_datetime_str = collection[len(collection) - 1].key().strip()
-            print(f'{platform.value} latest_scheduled_datetime_str: {latest_scheduled_datetime_str}')
-
+            latest_scheduled_datetime_str = list(collection.keys())[len(collection) - 1]
             formatted_iso = time_utils.convert_str_to_iso_format(latest_scheduled_datetime_str)
             latest_scheduled_datetime = time_utils.from_iso_format(formatted_iso)
             return latest_scheduled_datetime
         else:
-            print(f'{platform.value} something went wrong with get_latest_scheduled_datetime( self, platform )')  
+            print(f'{platform} something went wrong with get_latest_scheduled_datetime( self, platform )')  
             return ''  
 
     @classmethod
@@ -151,10 +150,6 @@ class FirebaseFirestore():
 
     @classmethod
     def upload_scheduled_post( self, user_id, platform, payload ):
-        print(f'upload_scheduled_post() user_id: {user_id} platform: {platform} payload: {payload}')
-        print(f'upload_scheduled_post() user_id: {user_id} platform: {platform.value} payload: {payload}')
-        print(f'{self.firebaseRealtimeDatabase.child(user_id).child(platform.value)}')
-
         last_posted_time = self.get_latest_scheduled_datetime(user_id, platform)
 
         if (last_posted_time == '' or last_posted_time is None):
@@ -194,6 +189,20 @@ class FirebaseFirestore():
             return upload_result
         else:
             return f'{platform.value} time not within posting window' 
+        
+    def get_all_posts( self, user_id ):
+        # need this to "warm up" the database. API has changed so this needs to be updated.
+        # self.firebaseRealtimeDatabase.child(user_id).get().val()
+        collectionDict = self.firebaseRealtimeDatabase.child(user_id).get().val()
+
+        if (collectionDict is None):
+            print('collection is none')
+
+        posts = {}
+        for key, value in collectionDict.items():
+            posts[key] = value
+
+        return posts
 
 #static instances
 firestore_instance = FirebaseFirestore()

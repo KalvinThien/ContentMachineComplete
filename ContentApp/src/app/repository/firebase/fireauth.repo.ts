@@ -15,6 +15,18 @@ export class FireAuthRepository {
   user$;
 
   private userSubject: Subject<FirebaseUser> = new Subject<FirebaseUser>();
+  
+  getUserAuthObservable(): Observable<FirebaseUser> {
+    return this.userSubject.asObservable();
+  }
+
+  isAuthenticated(): Observable<boolean> {
+    return of(this.currentSessionUser === undefined ? false : true);
+  }
+
+  isFirstTimeUser(): Observable<boolean> {
+    return of(this.currentSessionUser?.isVirgin === true);
+  }
 
   constructor(
     private fireAuth: Auth
@@ -37,18 +49,6 @@ export class FireAuthRepository {
         this.currentSessionUser = undefined;
       }
     });
-  }
-
-  getUserAuthObservable(): Observable<FirebaseUser> {
-    return this.userSubject.asObservable();
-  }
-
-  isAuthenticated(): Observable<boolean> {
-    return of(this.currentSessionUser === undefined ? false : true);
-  }
-
-  isFirstTimeUser(): Observable<boolean> {
-    return of(this.currentSessionUser?.isVirgin === true);
   }
 
   // Sign out

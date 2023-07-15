@@ -33,6 +33,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService } from 'primeng/api';
 import { MessageService } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 import { AccordionModule } from 'primeng/accordion';
 import { CreateContentComponent } from './views/createcontent/createcontent.component';
 import { StepsModule } from 'primeng/steps';
@@ -40,6 +41,7 @@ import { ListboxModule } from 'primeng/listbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { DropdownModule } from 'primeng/dropdown';
+import { SelectButton, SelectButtonModule } from 'primeng/selectbutton';
 
 firebase.initializeApp(environment.firebaseConfig);
 
@@ -69,9 +71,10 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     AccounthubComponent,
     LinkedinRedirectComponent,
     FacebookRedirectComponent,
-    CreateContentComponent,
+    CreateContentComponent
   ],
   imports: [
+    SelectButtonModule,
     DropdownModule,
     InputTextareaModule,
     ListboxModule,
@@ -104,7 +107,11 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     FirebaseUIModule.forRoot(firebaseUiAuthConfig),
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [
+    ConfirmationService, 
+    MessageService,
+    DialogService
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
