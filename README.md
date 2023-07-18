@@ -1,4 +1,4 @@
-# ContentMachineComplete 🚀
+# The Content Machine 🚀
 
 Welcome to the future, where you're just a click away from scheduling months of content across all platforms! Say goodbye to those tedious hours spent planning and say hello to more time doing what you do best - creating amazing content.
 
